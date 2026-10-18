@@ -23,7 +23,8 @@ scripts/guard-destroy.sh         destroy guard run by each stack's terraform_dat
 scripts/lib/check.sh             helpers for the per-stack check-deps.sh scripts
 stacks/*/check-deps.sh           pre-apply dependency check for that stack (run by make apply)
 OPERATIONS.md                    how to update each stack, what to re-apply, destroy guards
-Makefile                         apply/destroy all stacks in order
+Makefile                         apply/destroy all stacks in order; make single* for terraform/
+terraform/                       the SAME platform as ONE root module / one state (see below)
 state/                           one state file per stack: 00-cluster.tfstate, 10-nodes.tfstate, ... (git-ignored)
 ```
 
@@ -54,6 +55,54 @@ open $URL             # admin / $PASSWORD  (through the Istio ingress gateway)
 ```
 
 Or one stack at a time: `make 30-jenkins`, or `terraform -chdir=stacks/30-jenkins apply`.
+
+## Single root module (`terraform/`)
+
+The same platform as one Terraform root module with one state file
+(`state/single.tfstate`). Every resource, Helm value, label and ConfigMap is
+identical to the stacks; the only difference is that ordering comes from
+Terraform's dependency graph instead of `terraform_remote_state` + the Makefile
+loop. Use it when you want a one-shot `apply`/`destroy` and don't need to
+re-apply layers independently. **Pick one layout per machine** -- both create
+kind cluster `jenkins` at the same kubeconfig path, and `terraform/check-deps.sh`
+refuses to run while any `state/<stack>.tfstate` still holds resources.
+
+```
+terraform/
+  cluster.tf      = 00-cluster        nodes.tf   = 10-nodes
+  istio.tf        = 20-istio          jenkins.tf = 30-jenkins
+  jobs.tf         = 40-jenkins-jobs   (jobs + globalVars.yaml + hello-src)
+  providers.tf    kubernetes/helm/kubectl configured from kind_cluster.this
+  variables.tf    union of stacks/*/variables.tf, same names and defaults
+  terraform.tfvars  the five stack tfvars merged
+  guard.tf        destroy guard (refuses while builds are running)
+  check-deps.sh   host tooling, files, no overlapping staged deployment
+```
+
+```bash
+make single           # check-deps + init + apply   (~10 min first time)
+eval $(make single-output); export KUBECONFIG; open $URL
+make single-plan / single-deps / single-check
+make single-destroy   # guarded; FORCE_DESTROY=1 to bypass
+```
+
+Or plain Terraform: `terraform -chdir=terraform init && terraform -chdir=terraform apply`.
+It reads the same shared files the stacks do (`jenkins/values.yaml.tftpl`,
+`jenkins/jobs/*.Jenkinsfile`, `jenkins/globalVars.yaml`, `src/`, `scripts/`),
+so editing a Jenkinsfile or `globalVars.yaml` and re-applying works the same
+way; it just plans the whole platform (fast: the plan is a no-op for the
+unchanged layers).
+
+Two things the staged layout handles better, by design:
+
+- **Replacing the cluster** (`worker_count`, `kind_node_image`, `cluster_name`):
+  the Kubernetes providers are configured from `kind_cluster.this`, so a
+  single apply that recreates the cluster would try to talk to the old
+  endpoint for every in-cluster resource. Do `make single-destroy && make single`
+  instead of a single apply.
+- **Destroying one layer**: there is no `make destroy-30-jenkins` equivalent;
+  `terraform destroy -target=helm_release.jenkins` works but leaves the
+  dependency-ordering to you.
 
 ## Dependency checks
 

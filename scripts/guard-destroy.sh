@@ -123,6 +123,19 @@ case "$STACK" in
       fi
     fi
     ;;
+  single)
+    # terraform/ (single root module): Terraform orders the teardown itself,
+    # so the only thing worth refusing on is in-flight builds.
+    if cluster_up; then
+      running=$(k get pods -n jenkins -l jenkins/label=jenkins-jenkins-agent --no-headers | wc -l | tr -d ' ')
+      if [ "$running" -gt 0 ]; then
+        fail=1
+        red "BLOCKED: $running build(s) running; destroying the platform would strand them."
+        note "see:    kubectl get pods -n jenkins -l jenkins/label=jenkins-jenkins-agent"
+        note "fix:    let them finish or abort them in Jenkins"
+      fi
+    fi
+    ;;
   *) red "guard-destroy: unknown stack $STACK"; exit 2 ;;
 esac
 

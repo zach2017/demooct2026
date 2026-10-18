@@ -1,0 +1,18 @@
+jobs:
+  - script: |
+      pipelineJob('${name}') {
+        description('${description}')
+        parameters {
+%{~ for pname, p in parameters }
+          stringParam('${pname}', '${p[0]}', '${p[1]}')
+%{~ endfor }
+        }
+        definition {
+          cps {
+            sandbox(true)
+            script('''
+${indent(6, script)}
+            ''')
+          }
+        }
+      }

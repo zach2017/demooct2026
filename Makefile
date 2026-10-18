@@ -14,6 +14,8 @@ SHELL  := /usr/bin/env bash
 .SHELLFLAGS := -eo pipefail -c
 
 STACKS := 00-cluster 10-nodes 20-istio 30-jenkins 40-jenkins-jobs
+# single root module (same platform, one state file)
+SINGLE := terraform
 REVERSE := $(shell echo $(STACKS) | tr ' ' '\n' | sort -r | tr '\n' ' ')
 TF     ?= terraform
 TFARGS ?= -input=false
@@ -42,7 +44,8 @@ define section
 	@printf '\n\033[1m==== %s ====\033[0m\n' '$(1)'; printf '\n==== %s ====\n' '$(1)' >> "$(LOG)"
 endef
 
-.PHONY: help init plan apply destroy check deps migrate-state output log $(STACKS)
+.PHONY: help init plan apply destroy check deps migrate-state output log $(STACKS) \
+        single single-init single-plan single-apply single-destroy single-deps single-check single-output
 .PRECIOUS: logs/%
 
 help:
@@ -59,6 +62,9 @@ help:
 	@echo "  make migrate-state     move stacks/<s>/terraform.tfstate -> state/<s>.tfstate"
 	@echo "  make output            KUBECONFIG / URL / PASSWORD"
 	@echo "  make log               tail the latest log"
+	@echo "  single root module ($(SINGLE)/): everything above in ONE state file"
+	@echo "  make single            check-deps + init + apply  (== make single-apply)"
+	@echo "  make single-plan / single-destroy / single-deps / single-check / single-output"
 	@echo "  stacks: $(STACKS)"
 	@echo "  log:    $(LOG)   (LOG=/dev/null to disable)"
 
@@ -114,6 +120,42 @@ destroy-%:
 	$(call section,destroy stack $*)
 	$(call run,scripts/guard-destroy.sh $*)
 	$(call run,$(TF) -chdir=stacks/$* destroy $(TFARGS) $(if $(AUTO),-auto-approve,))
+
+# ---- single root module (terraform/) ---------------------------------------
+# Same platform as the five stacks, one state: state/single.tfstate.
+# Do not run alongside the staged layout (same cluster name / kubeconfig);
+# terraform/check-deps.sh refuses if any stack state still has resources.
+single: single-apply
+
+single-init:
+	$(call run,$(TF) -chdir=$(SINGLE) init -upgrade $(TFARGS))
+
+single-plan:
+	$(call run,$(TF) -chdir=$(SINGLE) plan $(TFARGS))
+
+single-apply:
+	$(call section,single root module $(SINGLE))
+	$(call run,$(SINGLE)/check-deps.sh)
+	$(call run,$(TF) -chdir=$(SINGLE) init $(TFARGS))
+	$(call run,$(TF) -chdir=$(SINGLE) apply $(TFARGS) $(if $(AUTO),-auto-approve,))
+	$(call section,apply finished; log: $(LOG))
+
+# FORCE_DESTROY=1 to bypass the guard
+single-destroy:
+	$(call section,destroy single root module $(SINGLE))
+	$(call run,scripts/guard-destroy.sh single)
+	$(call run,$(TF) -chdir=$(SINGLE) destroy $(TFARGS) $(if $(AUTO),-auto-approve,))
+
+single-deps:
+	$(call run,$(SINGLE)/check-deps.sh)
+
+single-check:
+	$(call run,scripts/guard-destroy.sh single)
+
+single-output:
+	@echo "KUBECONFIG=$$($(TF) -chdir=$(SINGLE) output -raw kubeconfig_path)"
+	@echo "URL=$$($(TF) -chdir=$(SINGLE) output -raw jenkins_url)"
+	@echo "PASSWORD=$$($(TF) -chdir=$(SINGLE) output -raw jenkins_admin_password)"
 
 # ---- utilities --------------------------------------------------------------
 # One-time: move state created by the old layout into state/<s>.tfstate.
