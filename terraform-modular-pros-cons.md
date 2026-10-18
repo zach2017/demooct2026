@@ -4,6 +4,10 @@ https://www.hashicorp.com/en/resources/evolving-infrastructure-terraform-opencre
 
 https://developer.hashicorp.com/terraform/tutorials/networking/multicloud-kubernetes
 
+https://www.hashicorp.com/en/blog/using-terraform-to-manage-multiple-kubernetes-clusters-on-premises-and-cloud
+
+https://dev.to/patdevops/terraform-state-secrets-best-practices-for-isolating-multi-environment-setups-5080
+
 **Context:** Moving from a single monolithic Terraform configuration to independent root modules (stacks) that communicate via `terraform_remote_state`, as demonstrated in https://github.com/zach2017/demooct2026.
 
 ---
