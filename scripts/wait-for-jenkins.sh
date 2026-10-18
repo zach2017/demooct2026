@@ -49,6 +49,17 @@ for kind in ("initContainerStatuses","containerStatuses"):
       say "    !! plugin-download init container failed on its last run; last output:"
       kubectl -n "$NS" logs "$POD" -c init --previous --tail=15 2>/dev/null | sed 's/^/    [init prev] /' | tee -a "$LOG"
     fi
+    # App container crash-looping? Pull the first real error from its last run
+    # (the tail is only the shutdown stack trace).
+    if kubectl -n "$NS" get pod "$POD" -o jsonpath='{.status.containerStatuses[?(@.name=="jenkins")].state.waiting.reason}' 2>/dev/null | grep -q CrashLoopBackOff; then
+      say "    !! jenkins container is crash-looping; first error lines from its previous run:"
+      kubectl -n "$NS" logs "$POD" -c jenkins --previous 2>/dev/null \
+        | grep -n -m 8 -E 'SEVERE|Exception|Error|ConfiguratorException|casc|Caused by' \
+        | sed 's/^/    [jenkins prev] /' | tee -a "$LOG"
+      kubectl -n "$NS" logs "$POD" -c jenkins --previous 2>/dev/null \
+        | grep -n -m 1 -B2 -A12 -E 'ConfiguratorException|UnknownConfiguratorException|while scanning|mapping values are not allowed|SEVERE' \
+        | sed 's/^/    [jenkins prev] /' | tee -a "$LOG"
+    fi
     for c in init jenkins; do
       lines=$(kubectl -n "$NS" logs "$POD" -c "$c" --tail=3 2>/dev/null)
       [ -n "$lines" ] && printf '%s\n' "$lines" | sed "s/^/    [$c] /" | tee -a "$LOG"

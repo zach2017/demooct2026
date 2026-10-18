@@ -3,9 +3,9 @@ jobs:
       pipelineJob('${name}') {
         description('${description}')
         parameters {
-%{ for pname, p in parameters ~}
+%{~ for pname, p in parameters }
           stringParam('${pname}', '${p[0]}', '${p[1]}')
-%{ endfor ~}
+%{~ endfor }
         }
         definition {
           cps {
