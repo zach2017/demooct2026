@@ -3,5 +3,5 @@ terraform {
   required_providers {
     kind = { source = "tehcyx/kind", version = "~> 0.5" }
   }
-  backend "local" { path = "terraform.tfstate" }
+  backend "local" { path = "../../state/00-cluster.tfstate" }
 }

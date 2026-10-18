@@ -23,7 +23,7 @@ note() { printf '  %s\n' "$*" >&2; }
 
 # ---- 1. downstream stacks still holding Terraform state ---------------------
 state_has_resources() {           # $1 = stack dir name
-  local f="$ROOT/stacks/$1/terraform.tfstate"
+  local f="$ROOT/state/$1.tfstate"
   [ -f "$f" ] && python3 -c 'import json,sys; r=json.load(open(sys.argv[1])).get("resources",[]); sys.exit(0 if any(x.get("mode")=="managed" for x in r) else 1)' "$f"
 }
 check_downstream() {              # $@ = downstream stack dirs

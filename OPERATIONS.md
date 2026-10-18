@@ -25,7 +25,7 @@ What each guard refuses on, and the command it prints to show you the blocker:
 
 | Destroying | Refused when | Shown by |
 |---|---|---|
-| `00-cluster` | any later stack still has managed resources in its state | `terraform -chdir=stacks/<n> state list` |
+| `00-cluster` | any later stack still has managed resources in its state | `terraform -chdir=stacks/<n> state list   # reads state/<n>.tfstate` |
 | | `istio-system` or `jenkins` namespace still exists | `kubectl get all -n <ns>` |
 | `10-nodes` | `30-jenkins`/`40-jenkins-jobs` have state | state list |
 | | workload pods are scheduled on a role-labelled node | `kubectl get pods -A --field-selector spec.nodeName=<node>` |
@@ -138,5 +138,5 @@ upstream change to see what moved.
 ## Recovery
 
 - Helm release stuck in `failed`: `helm -n jenkins uninstall jenkins` then `make 30-jenkins`.
-- Downstream state references a cluster that no longer exists: `FORCE_DESTROY=1 terraform -chdir=stacks/<n> destroy` (the guard would otherwise insist on live checks it can't make), or `rm stacks/<n>/terraform.tfstate*` if you accept losing state.
+- Downstream state references a cluster that no longer exists: `FORCE_DESTROY=1 terraform -chdir=stacks/<n> destroy` (the guard would otherwise insist on live checks it can't make), or `rm state/<n>.tfstate*` if you accept losing state.
 - Guard false positive (e.g. a stuck Terminating pod): fix the object, or bypass with `FORCE_DESTROY=1`.

@@ -1,9 +1,9 @@
 # Apply / destroy the stacks in dependency order. Each stack keeps its own
-# terraform.tfstate in its directory.
+# state file under state/<stack>.tfstate (local backend).
 STACKS := 00-cluster 10-nodes 20-istio 30-jenkins 40-jenkins-jobs
 TF     ?= terraform
 
-.PHONY: init plan apply destroy check $(STACKS) output
+.PHONY: init plan apply destroy check migrate-state $(STACKS) output
 
 init:
 	@for s in $(STACKS); do echo "== $$s"; $(TF) -chdir=stacks/$$s init -upgrade -input=false; done
@@ -38,3 +38,15 @@ output:
 	@echo "KUBECONFIG=$$($(TF) -chdir=stacks/00-cluster output -raw kubeconfig_path)"
 	@echo "URL=$$($(TF) -chdir=stacks/30-jenkins output -raw jenkins_url)"
 	@echo "PASSWORD=$$($(TF) -chdir=stacks/30-jenkins output -raw jenkins_admin_password)"
+
+# One-time: move state created by the old layout (stacks/<s>/terraform.tfstate)
+# into state/<s>.tfstate. Safe to re-run; skips stacks with nothing to move.
+migrate-state:
+	@mkdir -p state
+	@for s in $(STACKS); do \
+	  if [ -f stacks/$$s/terraform.tfstate ]; then \
+	    echo "== $$s: migrating"; \
+	    $(TF) -chdir=stacks/$$s init -migrate-state -force-copy -input=false >/dev/null && \
+	    rm -f stacks/$$s/terraform.tfstate stacks/$$s/terraform.tfstate.backup && echo "   -> state/$$s.tfstate"; \
+	  fi; done
+	@ls -1 state/*.tfstate 2>/dev/null || echo "no state files yet"

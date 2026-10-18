@@ -21,6 +21,7 @@ scripts/diagnose.sh              one-shot dump of everything
 scripts/guard-destroy.sh         destroy guard run by each stack's terraform_data.destroy_guard
 OPERATIONS.md                    how to update each stack, what to re-apply, destroy guards
 Makefile                         apply/destroy all stacks in order
+state/                           one state file per stack: 00-cluster.tfstate, 10-nodes.tfstate, ... (git-ignored)
 ```
 
 Data flow between stacks:
@@ -50,6 +51,24 @@ open $URL             # admin / $PASSWORD  (through the Istio ingress gateway)
 ```
 
 Or one stack at a time: `make 30-jenkins`, or `terraform -chdir=stacks/30-jenkins apply`.
+
+## State layout
+
+Every stack is a local-backend root module whose state lives at
+`state/<stack>.tfstate` (set in each `versions.tf`). Downstream stacks read
+upstream outputs with `terraform_remote_state` pointing at those same files.
+
+```
+state/00-cluster.tfstate      ← read by 10, 20, 30, 40
+state/10-nodes.tfstate        ← read by 30
+state/20-istio.tfstate        ← read by 30
+state/30-jenkins.tfstate      ← read by 40
+state/40-jenkins-jobs.tfstate
+```
+
+If you applied an earlier version of this repo that kept
+`stacks/<stack>/terraform.tfstate`, run `make migrate-state` once; it uses
+`terraform init -migrate-state` per stack and removes the old files.
 
 ## Why jobs are a separate stack
 

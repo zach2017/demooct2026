@@ -1,6 +1,6 @@
 data "terraform_remote_state" "cluster" {
   backend = "local"
-  config  = { path = "${path.module}/../00-cluster/terraform.tfstate" }
+  config  = { path = "${path.module}/../../state/00-cluster.tfstate" }
 }
 
 locals {
@@ -33,12 +33,12 @@ provider "kubectl" {
 
 data "terraform_remote_state" "nodes" {
   backend = "local"
-  config  = { path = "${path.module}/../10-nodes/terraform.tfstate" }
+  config  = { path = "${path.module}/../../state/10-nodes.tfstate" }
 }
 
 data "terraform_remote_state" "istio" {
   backend = "local"
-  config  = { path = "${path.module}/../20-istio/terraform.tfstate" }
+  config  = { path = "${path.module}/../../state/20-istio.tfstate" }
 }
 
 locals {

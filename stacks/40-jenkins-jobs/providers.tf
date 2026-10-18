@@ -1,6 +1,6 @@
 data "terraform_remote_state" "cluster" {
   backend = "local"
-  config  = { path = "${path.module}/../00-cluster/terraform.tfstate" }
+  config  = { path = "${path.module}/../../state/00-cluster.tfstate" }
 }
 
 locals {
@@ -33,7 +33,7 @@ provider "kubectl" {
 
 data "terraform_remote_state" "jenkins" {
   backend = "local"
-  config  = { path = "${path.module}/../30-jenkins/terraform.tfstate" }
+  config  = { path = "${path.module}/../../state/30-jenkins.tfstate" }
 }
 
 locals {

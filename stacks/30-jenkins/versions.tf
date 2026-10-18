@@ -7,5 +7,5 @@ terraform {
     random     = { source = "hashicorp/random", version = "~> 3.6" }
     null       = { source = "hashicorp/null", version = "~> 3.2" }
   }
-  backend "local" { path = "terraform.tfstate" }
+  backend "local" { path = "../../state/30-jenkins.tfstate" }
 }
