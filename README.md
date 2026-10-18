@@ -15,10 +15,13 @@ stacks/
   40-jenkins-jobs/   jobs as JCasC ConfigMaps (Job DSL), hot-reloaded into the running controller
 jenkins/values.yaml.tftpl        Helm values + JCasC (global env, agent pod template) used by 30-jenkins
 jenkins/jobs/*.Jenkinsfile       pipeline scripts used by 40-jenkins-jobs
+jenkins/globalVars.yaml          env vars for every agent pod -> ConfigMap jenkins-agent-global-vars (40-jenkins-jobs)
 src/                             sample Dockerfile with __HELLO_IMAGE__:__HELLO_IMAGE_TAG__ placeholders
 scripts/wait-for-jenkins.sh      prints pod/container/event/log status while Jenkins starts
 scripts/diagnose.sh              one-shot dump of everything
 scripts/guard-destroy.sh         destroy guard run by each stack's terraform_data.destroy_guard
+scripts/lib/check.sh             helpers for the per-stack check-deps.sh scripts
+stacks/*/check-deps.sh           pre-apply dependency check for that stack (run by make apply)
 OPERATIONS.md                    how to update each stack, what to re-apply, destroy guards
 Makefile                         apply/destroy all stacks in order
 state/                           one state file per stack: 00-cluster.tfstate, 10-nodes.tfstate, ... (git-ignored)
@@ -51,6 +54,28 @@ open $URL             # admin / $PASSWORD  (through the Istio ingress gateway)
 ```
 
 Or one stack at a time: `make 30-jenkins`, or `terraform -chdir=stacks/30-jenkins apply`.
+
+## Dependency checks
+
+Every stack directory has a `check-deps.sh`. It verifies what that stack
+needs from the host and from the stacks above it — CLIs, upstream state files,
+cluster reachability, node roles, CRDs, Istio deployments, the Jenkins pod,
+plugins, ConfigMaps, the ingress URL — and prints one line per item:
+
+```
+[ OK ]      state: 20-istio                  /…/state/20-istio.tfstate
+[ OK ]      node jenkins-worker (role=jenkins-controller)  Ready
+[MISSING]   crd: gateways.networking.istio.io   make 20-istio (istio-base CRDs)
+[UNHEALTHY] deployment/istiod (ns istio-system)  0/1 ready
+            ---- kubectl describe deployment -n istio-system istiod ----
+            …
+```
+
+`MISSING` tells you which stack (or install step) provides it; `UNHEALTHY`
+means the object exists but isn't ready, and the script runs `kubectl describe`
+on it so the reason is right there. `make apply` and `make <stack>` run the
+check first and stop on failure; `make deps` runs all five without applying,
+`make deps-30-jenkins` runs one.
 
 ## State layout
 
@@ -89,8 +114,24 @@ appears in Jenkins within ~30 s.
 1. injected into every agent pod via `envFrom` (so `$HELLO_IMAGE` works in `sh`), and
 2. declared as Jenkins global env vars via JCasC `globalNodeProperties` (so `env.HELLO_IMAGE` works in Groovy).
 
+There is a second, file-driven map for **agent pods only**: `jenkins/globalVars.yaml`.
+`stacks/40-jenkins-jobs/global-vars.tf` turns it into ConfigMap
+`jenkins-agent-global-vars`, and the agent pod template injects it with
+`envFrom` (optional, listed after `jenkins-global-env`, so its keys win on
+collision). Edit the file, `make 40-jenkins-jobs`, and the next build sees the
+new values — no controller restart. Keys must be valid env var names and values
+scalars (quote numbers/booleans); Terraform preconditions reject anything else.
+
+| | `var.global_env` (30) | `jenkins/globalVars.yaml` (40) |
+|---|---|---|
+| Source | Terraform variable | YAML file |
+| Agent pods (`$VAR` in `sh`) | yes | yes |
+| Controller / `env.VAR` in Groovy outside a node | yes (JCasC) | no |
+| Change needs | `make 30-jenkins` (Helm upgrade, JCasC reload) | `make 40-jenkins-jobs` |
+
 The `hello` job reads `HELLO_IMAGE`/`HELLO_IMAGE_TAG`, replaces the placeholders in
-`src/Dockerfile`, fails if any survive, and archives the result.
+`src/Dockerfile`, fails if any survive, archives the result, and prints
+`GLOBAL_GREETING` / `BUILD_TEAM` from `globalVars.yaml`.
 
 ## Networking through Istio
 
@@ -120,11 +161,12 @@ restarts, events, `init`/`jenkins` log tails) to the terminal and
 | You see | Cause | Fix |
 |---|---|---|
 | `connection refused` on `127.0.0.1:<port>` from `kubectl`/`helm` | wrong kubeconfig, or kind control-plane crashed (OOM) | `export KUBECONFIG=~/.kube/kind-jenkins.yaml`; `docker ps -a --filter name=jenkins-` |
-| `init  waiting ... BackOff`, `[init prev] <plugin> requires a greater version of Jenkins` | image older than current plugins need | bump `jenkins_image_tag` to the current LTS (https://www.jenkins.io/changelog-stable/) |
+| `init  waiting ... BackOff`, `[init prev] <plugin> requires a greater version of Jenkins` | Jenkins image older than current plugins need | bump `jenkins_chart_version` (its appVersion is the image); only set `jenkins_image_tag` if you must override |
+| `jenkins CrashLoopBackOff`, `[jenkins prev] UnknownAttributesException … DefaultCrumbIssuer : excludeClientIPFromCrumb` | chart older than the Jenkins core: its default JCasC uses a removed attribute | bump `jenkins_chart_version`; keep chart and image in step |
 | `init  waiting ImagePullBackOff` | can't pull from Docker Hub | check Docker network/proxy |
 | `init  running` for minutes, log stuck on a URL | plugin download blocked | keep `jenkins_controller_sidecar=false`; check host egress |
 | `jenkins running restarts=N`, `Startup probe failed` | slow first boot | raise `probes.startupProbe.failureThreshold` in values |
-| `[jenkins] ConfiguratorException` | JCasC YAML rejected | the message names the key |
+| `jenkins waiting restarts=N CrashLoopBackOff`, `[jenkins prev] ConfiguratorException` / `while scanning` | JCasC YAML rejected; Jenkins exits on a bad config | the watcher prints the first error; check the rendered values: `helm -n jenkins get values jenkins` |
 | job missing after `make 40-jenkins-jobs` | reload sidecar didn't pick it up | `kubectl -n jenkins logs jenkins-0 -c config-reload`; check the ConfigMap label |
 
 Failed Helm release stuck in state: `helm -n jenkins uninstall jenkins` then

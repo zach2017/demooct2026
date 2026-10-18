@@ -8,20 +8,9 @@ order: **apply from the changed stack downward, destroy from the bottom up.**
            └▶ 20-istio ─┘
 ```
 
-```
-
-kubectl -n jenkins get svc,pods,sts\n
- 
- helm -n jenkins get manifest jenkins | kubectl apply -f 
- 
- kubectl -n jenkins get svc
- 
- terraform -chdir=stacks/30-jenkins output -raw jenkins_admin_password
- 
- kubectl -n jenkins get secret jenkins-admin -o jsonpath='{.data.jenkins-admin-password}' | base64 -d; echo
- ```
 Rule of thumb for every change:
 
+0. `stacks/<stack>/check-deps.sh` — confirms everything the stack needs is present and healthy (upstream state, cluster objects), with `kubectl describe` output for anything unhealthy.
 1. `terraform -chdir=stacks/<stack> plan` — read what will be replaced vs. updated in place.
 2. If anything is **replaced** (`-/+`), everything below it that reads those outputs must be re-applied afterwards.
 3. `make check` before any destroy; the guards tell you what would block.
@@ -111,7 +100,8 @@ Verify: `kubectl -n istio-system get pods`, `istioctl version`, `curl -sI localh
 | Change | Effect | Before | After |
 |---|---|---|---|
 | `global_env` | ConfigMap updated **and** JCasC reloaded (chart config-reload sidecar) | — | new env is live for new builds within ~30 s. Running builds keep the old values. Verify: `kubectl -n jenkins get cm jenkins-global-env -o yaml`, and in Jenkins *Manage → System → Global properties* |
-| `jenkins_image_tag` / `jenkins_chart_version` | Helm upgrade, **controller pod restarts** (StatefulSet) | finish or abort running builds (`kubectl get pods -n jenkins -l jenkins/label=jenkins-jenkins-agent` should be empty) | the startup watcher streams progress; jobs from 40 are re-seeded automatically on reload |
+| `jenkins_chart_version` (and thereby the Jenkins image) | Helm upgrade, **controller pod restarts** (StatefulSet) | finish or abort running builds (`kubectl get pods -n jenkins -l jenkins/label=jenkins-jenkins-agent` should be empty); check the chart's release notes for renamed values | the startup watcher streams progress; jobs from 40 are re-seeded automatically on reload |
+| `jenkins_image_tag` override | same restart; **chart and core must agree** — an old chart's default JCasC can reference attributes a newer core removed (and vice-versa) | prefer bumping the chart instead | if JCasC fails, `[jenkins prev] UnknownAttributesException` names the offending key |
 | `installPlugins` in `values.yaml.tftpl` | controller restart | same as above; keep `jenkins_image_tag` a current LTS or the init container fails with `requires a greater version of Jenkins` | check `kubectl -n jenkins logs jenkins-0 -c init` |
 | `jenkins_controller_sidecar` | controller restart, pod gets/loses `istio-proxy` | 20-istio must be applied | `kubectl -n jenkins get pod jenkins-0 -o jsonpath='{.spec.initContainers[*].name}'` should list `istio-proxy` |
 | `jenkins_sidecar_injection` | namespace label change; **existing pods unaffected** | — | agent pods are fresh per build, so nothing to restart; controller: see row above |
@@ -128,6 +118,7 @@ Verify after any change: `kubectl -n jenkins get pods`, `scripts/wait-for-jenkin
 | edit a Jenkinsfile | ConfigMap updated, job definition replaced; **running builds finish with the old script** | — | next build uses the new script |
 | remove a job | ConfigMap deleted; Job DSL **does not delete** jobs on its own (`removedJobAction` defaults to IGNORE) | — | delete it in the UI or set `removedJobAction('DELETE')` in `job.yaml.tftpl` |
 | `src/Dockerfile`, `src/hello.sh` | `hello-src` ConfigMap updated; agent pods mount it fresh on every build | — | nothing |
+| `jenkins/globalVars.yaml` | `jenkins-agent-global-vars` ConfigMap updated; **every new agent pod** gets the new values via `envFrom` | keys must be env-var-safe, values scalar (apply fails otherwise); 30-jenkins must have been applied with the template that references this ConfigMap (`make deps-40-jenkins-jobs` checks) | nothing for new builds; running builds keep old values. Verify: `kubectl -n jenkins get cm jenkins-agent-global-vars -o yaml`, or run `hello` and read the "from jenkins/globalVars.yaml" lines |
 
 A job ConfigMap with invalid JCasC/Job DSL does not break the controller; the
 reload fails and the previous config stays active. Look at

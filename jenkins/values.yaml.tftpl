@@ -2,9 +2,11 @@
 # Target: local kind cluster, Istio mesh (namespace has istio-injection=enabled).
 
 controller:
-  # Override the chart's pinned image; see var.jenkins_image_tag.
+%{~ if jenkins_image_tag != "" }
+  # Override the chart's appVersion image; see var.jenkins_image_tag.
   image:
     tag: "${jenkins_image_tag}"
+%{~ endif }
 
   admin:
     existingSecret: jenkins-admin
@@ -22,9 +24,9 @@ controller:
 
   # Pin the controller to the node 10-nodes labeled for it.
   nodeSelector:
-%{ for k, v in controller_selector ~}
+%{~ for k, v in controller_selector }
     ${k}: ${v}
-%{ endfor ~}
+%{~ endfor }
   tolerations:
     - key: role
       operator: Equal
@@ -81,19 +83,19 @@ controller:
           globalNodeProperties:
             - envVars:
                 env:
-%{ for k, v in global_env ~}
+%{~ for k, v in global_env }
                   - key: "${k}"
                     value: "${v}"
-%{ endfor ~}
+%{~ endfor }
 
       # Jobs are delivered by stacks/40-jenkins-jobs as separate ConfigMaps
       # (label jenkins-jenkins-config=true) and hot-reloaded by this sidecar:
 agent:
   # Pipeline pods run only on the autoscaled "agents" pool.
   nodeSelector:
-%{ for k, v in agent_selector ~}
+%{~ for k, v in agent_selector }
     ${k}: ${v}
-%{ endfor ~}
+%{~ endfor }
 
   # Merge this into every agent pod. envFrom makes the ConfigMap keys
   # available as environment variables in every container of the pod.
@@ -112,6 +114,11 @@ agent:
           envFrom:
             - configMapRef:
                 name: ${global_env_configmap}
+            # jenkins/globalVars.yaml via stacks/40-jenkins-jobs; listed last so
+            # it overrides duplicate keys. Optional so agents start before 40 exists.
+            - configMapRef:
+                name: jenkins-agent-global-vars
+                optional: true
           volumeMounts:
             - name: hello-src
               mountPath: /bundled-src

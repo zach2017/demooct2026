@@ -3,13 +3,21 @@
 STACKS := 00-cluster 10-nodes 20-istio 30-jenkins 40-jenkins-jobs
 TF     ?= terraform
 
-.PHONY: init plan apply destroy check migrate-state $(STACKS) output
+.PHONY: init plan apply destroy check deps migrate-state $(STACKS) output
 
 init:
 	@for s in $(STACKS); do echo "== $$s"; $(TF) -chdir=stacks/$$s init -upgrade -input=false; done
 
 apply:
-	@for s in $(STACKS); do echo "== apply $$s"; $(TF) -chdir=stacks/$$s apply -auto-approve -input=false || exit 1; done
+	@for s in $(STACKS); do \
+	  stacks/$$s/check-deps.sh || exit 1; \
+	  echo "== apply $$s"; $(TF) -chdir=stacks/$$s apply -auto-approve -input=false || exit 1; done
+
+# dependency checks only: make deps (all) or make deps-30-jenkins
+deps:
+	@for s in $(STACKS); do stacks/$$s/check-deps.sh || true; done
+deps-%:
+	stacks/$*/check-deps.sh
 
 plan:
 	@for s in $(STACKS); do echo "== plan $$s"; $(TF) -chdir=stacks/$$s plan -input=false; done
@@ -32,6 +40,7 @@ check:
 
 # apply a single stack: make 30-jenkins
 $(STACKS):
+	@stacks/$@/check-deps.sh
 	$(TF) -chdir=stacks/$@ init -input=false >/dev/null && $(TF) -chdir=stacks/$@ apply -input=false
 
 output:

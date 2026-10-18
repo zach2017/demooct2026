@@ -21,6 +21,9 @@ pipeline {
           echo "DOCKER_REGISTRY  = $DOCKER_REGISTRY"
           echo "ENVIRONMENT_NAME = $ENVIRONMENT_NAME"
           echo "HELLO_IMAGE_REF  = $HELLO_IMAGE_REF"
+          echo "--- from jenkins/globalVars.yaml (ConfigMap jenkins-agent-global-vars) ---"
+          echo "GLOBAL_GREETING  = ${GLOBAL_GREETING:-<not set: apply 40-jenkins-jobs>}"
+          echo "BUILD_TEAM       = ${BUILD_TEAM:-<not set>}"
         '''
       }
     }
@@ -63,7 +66,7 @@ pipeline {
 
     stage('Hello') {
       steps {
-        sh 'echo "Hello from $ORG_NAME ($ENVIRONMENT_NAME) - Dockerfile now builds FROM $HELLO_IMAGE_REF"'
+        sh 'echo "$GLOBAL_GREETING -- $ORG_NAME ($ENVIRONMENT_NAME) - Dockerfile now builds FROM $HELLO_IMAGE_REF"'
         archiveArtifacts artifacts: "${SRC_DIR}/Dockerfile", fingerprint: true
       }
     }
