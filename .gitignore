@@ -1,0 +1,4 @@
+stacks/00-cluster/.terraform.lock.hcl
+stacks/00-cluster/.terraform/terraform.tfstate
+stacks/00-cluster/.terraform/
+state/
