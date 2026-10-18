@@ -1,10 +1,10 @@
 # Same values as stacks/*/terraform.tfvars, merged into one file.
 
 # --- cluster (00) ---
-cluster_name            = "jenkins"
+cluster_name            = "jenkins2"
 worker_count            = 2       # 1 controller node + 1 agent node
-ingress_http_host_port  = 8080
-ingress_https_host_port = 8443
+ingress_http_host_port  = 8085
+ingress_https_host_port = 8445
 
 # --- istio (20) ---
 istio_version = "1.24.2"

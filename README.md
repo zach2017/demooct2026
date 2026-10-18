@@ -266,3 +266,94 @@ kubectl -n jenkins get secret jenkins-admin -o jsonpath='{.data.jenkins-admin-pa
 
 
 ```
+
+To inspect your **kind** (Kubernetes in Docker) clusters, you use a combination of the `kind` CLI (to list the clusters/containers themselves) and `kubectl` (to inspect the Kubernetes state inside them).
+
+### 1. List All `kind` Clusters and Nodes
+
+Before running `kubectl`, check which `kind` clusters exist on your machine:
+
+```bash
+# List all running kind cluster names
+kind get clusters
+
+# List the Docker container "nodes" for a specific cluster (default name is "kind")
+kind get nodes --name <cluster-name>
+
+```
+
+---
+
+### 2. Get Cluster Endpoint Info for All `kind` Clusters
+
+By default, `kind` prefixes cluster contexts with `kind-` (for example, a cluster named `dev` has the context `kind-dev`).
+
+**For a single cluster:**
+
+```bash
+kubectl cluster-info --context kind-<cluster-name>
+
+```
+
+**Loop through all `kind` clusters at once (Bash/Zsh):**
+
+```bash
+for cluster in $(kind get clusters); do
+  echo "=== Cluster: $cluster ==="
+  kubectl cluster-info --context "kind-$cluster"
+  kubectl get nodes --context "kind-$cluster" -o wide
+  echo ""
+done
+
+```
+
+---
+
+### 3. Get All Resources Inside a Cluster
+
+If you want to see everything running inside your active `kind` cluster across all namespaces:
+
+```bash
+# Get common workload resources (Pods, Services, DaemonSets, Deployments, ReplicaSets) across all namespaces
+kubectl get all --all-namespaces
+
+# Shortened flag version (with node/IP details)
+kubectl get all -A -o wide
+
+```
+
+> **Note on `kubectl get all`:** Despite the name, `kubectl get all` intentionally excludes ConfigMaps, Secrets, Ingresses, PVCs, and Nodes. To inspect those alongside workloads, run:
+> ```bash
+> kubectl get nodes,all,ing,pvc,cm,secret -A
+> 
+> ```
+> 
+> 
+
+---
+
+### 4. Full Diagnostic State Dump
+
+If you are troubleshooting a broken cluster and literally need **all** cluster logs, events, and resource states exported:
+
+```bash
+# Dump full cluster state and pod logs to the terminal
+kubectl cluster-info dump
+
+# Or save the entire dump cleanly into a folder
+kubectl cluster-info dump --all-namespaces --output-directory=./kind-cluster-dump
+
+```
+
+---
+
+### Quick Reference Table
+
+| Goal | Command |
+| --- | --- |
+| **List all local `kind` clusters** | `kind get clusters` |
+| **See all `kubectl` contexts** | `kubectl config get-contexts` |
+| **Switch active `kind` cluster** | `kubectl config use-context kind-<cluster-name>` |
+| **View control plane & CoreDNS URLs** | `kubectl cluster-info` |
+| **View node status & IPs** | `kubectl get nodes -o wide` |
+| **View all workloads in all namespaces** | `kubectl get all -A` |

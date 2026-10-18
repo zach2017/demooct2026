@@ -1,0 +1,2 @@
+17:47:37 waiting for pod jenkins/jenkins-0 (timeout 1800s); log: ./jenkins-startup.log
+17:47:43 [0s] phase=Pending jenkins-ready=n/a
