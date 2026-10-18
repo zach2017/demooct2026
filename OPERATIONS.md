@@ -8,6 +8,18 @@ order: **apply from the changed stack downward, destroy from the bottom up.**
            └▶ 20-istio ─┘
 ```
 
+```
+
+kubectl -n jenkins get svc,pods,sts\n
+ 
+ helm -n jenkins get manifest jenkins | kubectl apply -f 
+ 
+ kubectl -n jenkins get svc
+ 
+ terraform -chdir=stacks/30-jenkins output -raw jenkins_admin_password
+ 
+ kubectl -n jenkins get secret jenkins-admin -o jsonpath='{.data.jenkins-admin-password}' | base64 -d; echo
+ ```
 Rule of thumb for every change:
 
 1. `terraform -chdir=stacks/<stack> plan` — read what will be replaced vs. updated in place.
