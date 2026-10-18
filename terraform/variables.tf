@@ -33,13 +33,13 @@ variable "worker_count" {
 variable "ingress_http_host_port" {
   description = "localhost port mapped to NodePort 30080 (Istio ingress HTTP)"
   type        = number
-  default     = 8080
+  default     = 8085
 }
 
 variable "ingress_https_host_port" {
   description = "localhost port mapped to NodePort 30443 (Istio ingress HTTPS)"
   type        = number
-  default     = 8443
+  default     = 8445
 }
 
 # --- 20-istio -----------------------------------------------------------------

@@ -1,2 +1,113 @@
 17:47:37 waiting for pod jenkins/jenkins-0 (timeout 1800s); log: ./jenkins-startup.log
 17:47:43 [0s] phase=Pending jenkins-ready=n/a
+17:48:03 [23s] phase=Pending jenkins-ready=n/a
+17:48:23 [43s] phase=Pending jenkins-ready=n/a
+17:48:41 [63s] phase=Pending jenkins-ready=n/a
+17:49:07 [85s] phase=Pending jenkins-ready=n/a
+17:49:36 [115s] phase=Pending jenkins-ready=n/a
+17:50:02 [144s] phase=Pending jenkins-ready=n/a
+17:50:23 [164s] phase=Pending jenkins-ready=n/a
+17:50:48 [188s] phase=Pending jenkins-ready=n/a
+17:51:07 [209s] phase=Pending jenkins-ready=false
+    init config-reload-init waiting    restarts=0 PodInitializing
+    init init           waiting    restarts=0 PodInitializing
+    cont config-reload  waiting    restarts=0 PodInitializing
+    cont jenkins        waiting    restarts=0 PodInitializing
+    ev: LAST SEEN   TYPE     REASON      OBJECT          MESSAGE
+    ev: 8s          Normal   Scheduled   pod/jenkins-0   Successfully assigned jenkins/jenkins-0 to jenkins2-worker
+17:51:31 [232s] phase=Pending jenkins-ready=false
+    init config-reload-init waiting    restarts=0 PodInitializing
+    init init           waiting    restarts=0 PodInitializing
+    cont config-reload  waiting    restarts=0 PodInitializing
+    cont jenkins        waiting    restarts=0 PodInitializing
+    ev: LAST SEEN   TYPE     REASON      OBJECT          MESSAGE
+    ev: 32s         Normal   Scheduled   pod/jenkins-0   Successfully assigned jenkins/jenkins-0 to jenkins2-worker
+    ev: 16s         Normal   Pulling     pod/jenkins-0   Pulling image "docker.io/kiwigrid/k8s-sidecar:2.11.2"
+17:51:59 [256s] phase=Pending jenkins-ready=false
+    init config-reload-init waiting    restarts=0 PodInitializing
+    init init           waiting    restarts=0 PodInitializing
+    cont config-reload  waiting    restarts=0 PodInitializing
+    cont jenkins        waiting    restarts=0 PodInitializing
+    ev: LAST SEEN   TYPE     REASON      OBJECT          MESSAGE
+    ev: 59s         Normal   Scheduled   pod/jenkins-0   Successfully assigned jenkins/jenkins-0 to jenkins2-worker
+    ev: 43s         Normal   Pulling     pod/jenkins-0   Pulling image "docker.io/kiwigrid/k8s-sidecar:2.11.2"
+17:53:12 [334s] phase=Pending jenkins-ready=false
+    init config-reload-init waiting    restarts=0 PodInitializing
+    init init           waiting    restarts=0 PodInitializing
+    cont config-reload  waiting    restarts=0 PodInitializing
+    cont jenkins        waiting    restarts=0 PodInitializing
+    ev: LAST SEEN   TYPE     REASON      OBJECT          MESSAGE
+    ev: 2m12s       Normal   Scheduled   pod/jenkins-0   Successfully assigned jenkins/jenkins-0 to jenkins2-worker
+    ev: 116s        Normal   Pulling     pod/jenkins-0   Pulling image "docker.io/kiwigrid/k8s-sidecar:2.11.2"
+17:54:08 [356s] phase=Pending jenkins-ready=false
+17:56:22 [523s] phase=Pending jenkins-ready=false
+    init config-reload-init waiting    restarts=0 PodInitializing
+    init init           waiting    restarts=0 PodInitializing
+    cont config-reload  waiting    restarts=0 PodInitializing
+    cont jenkins        waiting    restarts=0 PodInitializing
+    ev: LAST SEEN   TYPE     REASON      OBJECT          MESSAGE
+    ev: 5m22s       Normal   Scheduled   pod/jenkins-0   Successfully assigned jenkins/jenkins-0 to jenkins2-worker
+    ev: 5m6s        Normal   Pulling     pod/jenkins-0   Pulling image "docker.io/kiwigrid/k8s-sidecar:2.11.2"
+17:56:50 [552s] phase=Pending jenkins-ready=false
+    init config-reload-init running    restarts=0 
+    init init           waiting    restarts=0 PodInitializing
+    cont config-reload  waiting    restarts=0 PodInitializing
+    cont jenkins        waiting    restarts=0 PodInitializing
+    ev: 5m33s       Normal   Pulling     pod/jenkins-0   Pulling image "docker.io/kiwigrid/k8s-sidecar:2.11.2"
+    ev: 4s          Normal   Pulled      pod/jenkins-0   Successfully pulled image "docker.io/kiwigrid/k8s-sidecar:2.11.2" in 5m29.592s (5m29.592s including waiting). Image size: 30922233 bytes.
+    ev: 4s          Normal   Created     pod/jenkins-0   Created container config-reload-init
+    ev: 3s          Normal   Started     pod/jenkins-0   Started container config-reload-init
+17:57:07 [569s] phase=Pending jenkins-ready=false
+    init config-reload-init terminated restarts=0 Completed
+    init init           waiting    restarts=0 PodInitializing
+    cont config-reload  waiting    restarts=0 PodInitializing
+    cont jenkins        waiting    restarts=0 PodInitializing
+    ev: 23s         Normal   Pulled      pod/jenkins-0   Successfully pulled image "docker.io/kiwigrid/k8s-sidecar:2.11.2" in 5m29.592s (5m29.592s including waiting). Image size: 30922233 bytes.
+    ev: 23s         Normal   Created     pod/jenkins-0   Created container config-reload-init
+    ev: 22s         Normal   Started     pod/jenkins-0   Started container config-reload-init
+    ev: 14s         Normal   Pulling     pod/jenkins-0   Pulling image "docker.io/jenkins/jenkins:2.580.1-jdk25"
+17:58:24 [644s] phase=Pending jenkins-ready=false
+    init config-reload-init terminated restarts=0 Completed
+    init init           running    restarts=0 
+    cont config-reload  waiting    restarts=0 PodInitializing
+    cont jenkins        waiting    restarts=0 PodInitializing
+    ev: 90s         Normal   Pulling     pod/jenkins-0   Pulling image "docker.io/jenkins/jenkins:2.580.1-jdk25"
+    ev: 6s          Normal   Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk25" in 1m24.021s (1m24.022s including waiting). Image size: 315569742 bytes.
+    ev: 5s          Normal   Created     pod/jenkins-0   Created container init
+    ev: 5s          Normal   Started     pod/jenkins-0   Started container init
+    [init] Created cache at: /var/jenkins_home/.cache/jenkins-plugin-management-cli
+    [init] Update center URL: https://updates.jenkins.io/update-center.json?version=2.580.1
+    [init] Cache miss for: update-center-2.580.1
+17:58:42 [663s] phase=Pending jenkins-ready=false
+    init config-reload-init terminated restarts=0 Completed
+    init init           running    restarts=0 
+    cont config-reload  waiting    restarts=0 PodInitializing
+    cont jenkins        waiting    restarts=0 PodInitializing
+    ev: 108s        Normal   Pulling     pod/jenkins-0   Pulling image "docker.io/jenkins/jenkins:2.580.1-jdk25"
+    ev: 24s         Normal   Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk25" in 1m24.021s (1m24.022s including waiting). Image size: 315569742 bytes.
+    ev: 23s         Normal   Created     pod/jenkins-0   Created container init
+    ev: 23s         Normal   Started     pod/jenkins-0   Started container init
+    [init] Done
+    [init] copy plugins to shared volume
+    [init] finished initialization
+17:59:00 [682s] phase=Running jenkins-ready=false
+    init config-reload-init terminated restarts=0 Completed
+    init init           terminated restarts=0 Completed
+    cont config-reload  running    restarts=0 
+    cont jenkins        running    restarts=0 
+    ev: 14s         Normal    Pulled      pod/jenkins-0   Container image "docker.io/kiwigrid/k8s-sidecar:2.11.2" already present on machine
+    ev: 14s         Normal    Created     pod/jenkins-0   Created container config-reload
+    ev: 14s         Normal    Started     pod/jenkins-0   Started container config-reload
+    ev: 4s          Warning   Unhealthy   pod/jenkins-0   Startup probe failed: HTTP probe failed with statuscode: 503
+    [init] Done
+    [init] copy plugins to shared volume
+    [init] finished initialization
+    [jenkins] 2026-10-18 22:58:57.349+0000 [id=44]	WARNING	hudson.model.User$AllUsers#scanAll: entry for admin in /var/jenkins_home/users/admin_7419f890405669ff207f71f258594ddf3cba0bb20ed06bfe60b64fec704065ee duplicates one seen earlier for admin
+    [jenkins] 2026-10-18 22:58:57.350+0000 [id=44]	INFO	jenkins.InitReactorRunner$1#onAttained: Completed initialization
+    [jenkins] 2026-10-18 22:58:57.368+0000 [id=33]	INFO	hudson.lifecycle.Lifecycle#onReady: Jenkins is fully up and running
+17:59:15 [698s] phase=Running jenkins-ready=true
+    init config-reload-init terminated restarts=0 Completed
+    init init           terminated restarts=0 Completed
+    cont config-reload  running    restarts=0 
+    cont jenkins        running    restarts=0 
+17:59:15 Jenkins is Ready after 698s

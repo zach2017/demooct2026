@@ -14,7 +14,7 @@ check_docker
 
 # Host ports the ingress gateway will be mapped to (skip if already deployed by us)
 if ! [ -f "$STATE_DIR/single.tfstate" ]; then
-  for p in 8080 8443; do
+  for p in 8085 8445; do
     if (command -v lsof >/dev/null && lsof -iTCP:$p -sTCP:LISTEN >/dev/null 2>&1); then _bad "host port $p" "already in use: $(lsof -iTCP:$p -sTCP:LISTEN -Fc | sed -n 's/^c//p' | head -1)"; else _ok "host port $p" "free"; fi
   done
 fi
