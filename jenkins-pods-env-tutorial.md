@@ -5,6 +5,8 @@
 
 This repository deploys Jenkins on a local kind Kubernetes cluster with Istio using **five layered Terraform root modules** (stacks). Jobs and certain agent environment variables live in a separate stack so they can be updated without restarting the Jenkins controller.
 
+The layout follows the **Terraservices** pattern described by OpenCredo (independent root modules with their own state, communicating via `terraform_remote_state`) and matches the component-directory + remote-state approach used in HashiCorp’s multi-cloud Kubernetes tutorial.
+
 ---
 
 ## 1. High-Level Architecture
@@ -18,7 +20,7 @@ stacks/
   40-jenkins-jobs/→ Jobs as JCasC ConfigMaps + agent-only global vars
 ```
 
-Data flows via `terraform_remote_state` (local backend files in `state/`).
+Data flows via `terraform_remote_state` (local backend files in `state/`). In production this would move to a remote backend with locking and encryption.
 
 **Two distinct sources of environment for Jenkins pods:**
 
@@ -28,6 +30,8 @@ Data flows via `terraform_remote_state` (local backend files in `state/`).
 | `jenkins/globalVars.yaml` | 40-jenkins-jobs | `jenkins-agent-global-vars` | Agents only (`envFrom`, optional) | `make 40-jenkins-jobs` (no controller restart) |
 
 Agent pods receive **both** via `envFrom`. The agent-specific map is listed last, so its keys override duplicates.
+
+This separation of concerns (controller configuration vs. frequently changing jobs and agent environment) is a practical example of the isolation benefits of Terraservices: daily job and variable changes do not require touching the cluster or controller stacks.
 
 ---
 
@@ -57,6 +61,7 @@ locals {
 resource "kubernetes_secret" "jenkins_admin" { ... }
 ```
 - Generates or uses a provided admin password and stores it in a Secret referenced by the Helm chart.
+- Secrets are passed via variables rather than hardcoded (aligns with multi-environment secrets isolation guidance).
 
 ### 2.2 Global Environment ConfigMap
 
@@ -342,10 +347,10 @@ Destroy guards and dependency checks (`check-deps.sh`) prevent accidental destru
 
 ## 8. Key Design Decisions
 
-1. **Separation of jobs and agent env into stack 40** — allows hot updates without controller restarts.
+1. **Separation of jobs and agent env into stack 40** — allows hot updates without controller restarts (Terraservices-style isolation).
 2. **Dual injection of `global_env`** — ConfigMap for pods + JCasC for Groovy on the controller.
 3. **Optional ConfigMap reference** — agents can start before stack 40 is applied.
 4. **Controller sidecar off by default** — avoids common first-boot stalls.
-5. **Local remote state + explicit ordering** — each stack is independently applyable/destroyable while still sharing data.
+5. **Local remote state + explicit ordering** — each stack is independently applyable/destroyable while still sharing data (same pattern as HashiCorp multi-cloud tutorial).
 
-This pattern gives strong modularity while keeping the Jenkins experience simple for pipeline authors. 
+This pattern gives strong modularity while keeping the Jenkins experience simple for pipeline authors, and aligns with industry guidance on evolving from monolithic Terraform to independently managed components.

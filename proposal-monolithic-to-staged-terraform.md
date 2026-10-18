@@ -4,18 +4,24 @@
 
 **Reference implementation:** https://github.com/zach2017/demooct2026
 
+This proposal draws on:
+- OpenCredo’s evolutionary model (Terralith → Multi-Terralith → Terramod → Terraservices)
+- HashiCorp multi-cloud Kubernetes tutorial (separate directories + remote state)
+- Multi-environment state and secrets isolation practices
+
 ---
 
 ## 1. Why Stage the Configuration?
 
-A monolithic configuration forces every change—whether a new Jenkinsfile, a chart version bump, or an Istio egress rule—through the same plan and state. This creates:
+A monolithic configuration (Terralith) forces every change—whether a new Jenkinsfile, a chart version bump, or an Istio egress rule—through the same plan and state. This creates:
 
 - Large blast radius
 - Long plan/apply times
 - Tight coupling between layers that change at different rates
 - Difficult ownership and review
+- High risk of cross-environment accidents
 
-Staging (as demonstrated in the reference repo) isolates change frequency, enables independent upgrades, and provides clear contracts between layers while preserving the ability to apply or destroy a single layer safely.
+Staging (Terraservices) isolates change frequency, enables independent upgrades, and provides clear contracts between layers while preserving the ability to apply or destroy a single layer safely. This is the same isolation pattern used in HashiCorp’s multi-cloud Kubernetes tutorial and recommended for multi-team environments.
 
 ---
 
@@ -34,11 +40,16 @@ stacks/
 - Each stack is a root module with its own state file (`state/<stack>.tfstate` or remote backend path).
 - Downstream stacks read upstream outputs exclusively through `terraform_remote_state`.
 - No direct resource references across stack boundaries.
+- Provider aliases can be used inside a stack when it must talk to multiple clusters (as demonstrated in the multi-cloud tutorial).
 
 **Supporting automation**
 - Makefile (or CI pipeline) that applies in order and destroys in reverse order.
 - Per-stack `check-deps.sh` scripts that verify upstream state and live cluster health.
 - Destroy guards (`terraform_data` + local-exec) that refuse to destroy a stack while downstream resources still exist.
+
+**State backend recommendation**
+- Development: local backends are acceptable.
+- Production / team use: remote backends (S3 + DynamoDB locking, Terraform Cloud, or equivalent) with encryption, versioning, and access controls. Never store secrets in state or commit state to Git. Prefer separate state per component *and* per environment over workspaces when lifecycles differ.
 
 ---
 
@@ -52,7 +63,7 @@ stacks/
 | 30-control-plane-app | Jenkins / Argo / etc. controller, global config | Moderately | Jobs / workloads |
 | 40-workloads | Jobs, pipelines, application ConfigMaps, agent env | Daily | End users |
 
-Adjust the split to match your change frequency and team boundaries. The key is that each stage has a single, clear responsibility and a stable set of outputs.
+Adjust the split to match your change frequency and team boundaries. The key is that each stage has a single, clear responsibility and a stable set of outputs. This mirrors the component directories (eks, aks, consul, application) in the HashiCorp multi-cloud tutorial.
 
 ---
 
@@ -61,8 +72,9 @@ Adjust the split to match your change frequency and team boundaries. The key is 
 ### Phase 0 – Preparation (1–2 days)
 1. Inventory the current monolithic configuration: list every resource and the layer it belongs to.
 2. Define the desired output contracts for each future stage.
-3. Choose state backend strategy (local for experiment, S3/Terraform Cloud/Spacelift for production).
+3. Choose state backend strategy (local for experiment, remote with locking/encryption for production).
 4. Create the directory structure and a skeleton Makefile.
+5. Document the evolutionary rationale (moving from Terralith toward Terraservices) for stakeholders.
 
 ### Phase 1 – Extract the Foundation (00)
 1. Move cluster, kubeconfig, and base networking resources into `stacks/00-cluster`.
@@ -92,12 +104,14 @@ Repeat for each stage, working from the bottom up or in dependency order:
 2. Write and wire per-stack dependency check scripts.
 3. Update CI to use the ordered Makefile targets.
 4. Document the apply/destroy order and the output contracts (see OPERATIONS.md style).
+5. Add backend encryption, locking, and versioning; ensure secrets are passed via variables or external secret stores rather than hardcoded.
 
 ### Phase 4 – Cut Over and Clean Up
 1. Once all stages are live and verified, remove the old monolithic configuration.
 2. Run a full destroy (with guards) in a non-production environment to validate the reverse order.
 3. Update runbooks and onboarding docs.
 4. Archive the old state file.
+5. For multi-cluster or DR scenarios, prepare state import/push procedures similar to those used in the Redapt Rancher recovery workflow.
 
 ---
 
@@ -110,7 +124,7 @@ Repeat for each stage, working from the bottom up or in dependency order:
 | Parallel run + switch | You can afford temporary duplication | Higher cost, lowest risk |
 | `terraform init -migrate-state` | Moving an existing state file into the new path | Low if done one stack at a time |
 
-Always take a state backup before any migration.
+Always take a state backup before any migration. Prefer remote backends with versioning so you can roll back state independently of code.
 
 ---
 
@@ -122,6 +136,7 @@ Always take a state backup before any migration.
 - [ ] Full `make apply` and `make destroy` succeed end-to-end.
 - [ ] Plans for a single stage are small and reviewable.
 - [ ] New team members can add a job by editing one directory and running one make target.
+- [ ] State is isolated per component (and per environment if applicable), stored remotely with locking and encryption, and contains no plaintext secrets.
 
 ---
 
@@ -134,6 +149,8 @@ Always take a state backup before any migration.
 | Developers apply stages out of order | Makefile + CI enforcement; `check-deps.sh` fails fast |
 | Local state files are lost | Move to remote backend early; encrypt and version state |
 | Destroy guards are incomplete | Regularly run `make check`; add new guards when new cross-stack dependencies appear |
+| Secrets leak into state | Pass secrets via variables or external stores (Vault, etc.); enable backend encryption; audit state |
+| Multi-cluster credential or DR complexity | Use provider aliases; document import/push procedures; store recoverable configuration in state as shown in multi-cluster case studies |
 
 ---
 
@@ -153,6 +170,6 @@ Total: approximately 1–2 weeks for a platform the size of the reference reposi
 
 ## 9. Recommendation
 
-Proceed with the staged model. The reference implementation already proves that the pattern works for a realistic Jenkins-on-Istio-on-kind setup, including hot-reload of jobs and agent environment variables. The investment in ordering automation and destroy guards pays for itself the first time someone needs to update a pipeline without restarting the controller or re-creating the cluster.
+Proceed with the staged (Terraservices-style) model. The reference implementation already proves that the pattern works for a realistic Jenkins-on-Istio-on-kind setup, including hot-reload of jobs and agent environment variables. The investment in ordering automation and destroy guards pays for itself the first time someone needs to update a pipeline without restarting the controller or re-creating the cluster.
 
-Start with a non-production environment, migrate one stage at a time, and keep the old configuration available until the full ordered apply/destroy cycle is proven. 
+This approach aligns with industry patterns from OpenCredo, HashiCorp’s multi-cloud tutorials, and multi-environment state isolation guidance. Start with a non-production environment, migrate one stage at a time, move to a remote backend with locking and encryption as soon as more than one person is involved, and keep the old configuration available until the full ordered apply/destroy cycle is proven.
