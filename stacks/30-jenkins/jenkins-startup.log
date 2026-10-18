@@ -1,0 +1,35 @@
+16:20:23 waiting for pod jenkins/jenkins-0 (timeout 1800s); log: ./jenkins-startup.log
+16:20:23 [0s] phase=Pending jenkins-ready=n/a
+16:20:39 [15s] phase=Pending jenkins-ready=false
+    init config-reload-init terminated restarts=0 Completed
+    init init           waiting    restarts=0 PodInitializing
+    cont config-reload  waiting    restarts=0 PodInitializing
+    cont jenkins        waiting    restarts=0 PodInitializing
+    ev: 6s          Normal   Pulling     pod/jenkins-0   Pulling image "docker.io/jenkins/jenkins:2.580.1-jdk25"
+    ev: 1s          Normal   Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk25" in 5.58s (5.58s including waiting). Image size: 315569742 bytes.
+    ev: 1s          Normal   Created     pod/jenkins-0   Created container init
+    ev: 1s          Normal   Started     pod/jenkins-0   Started container init
+    [init] Created cache at: /var/jenkins_home/.cache/jenkins-plugin-management-cli
+    [init] Update center URL: https://updates.jenkins.io/update-center.json?version=2.580.1
+    [init] Cache miss for: update-center-2.580.1
+16:20:54 [31s] phase=Running jenkins-ready=false
+    init config-reload-init terminated restarts=0 Completed
+    init init           terminated restarts=0 Completed
+    cont config-reload  running    restarts=0 
+    cont jenkins        running    restarts=0 
+    ev: 10s         Normal    Pulled      pod/jenkins-0   Container image "docker.io/kiwigrid/k8s-sidecar:2.11.2" already present on machine
+    ev: 10s         Normal    Created     pod/jenkins-0   Created container config-reload
+    ev: 10s         Normal    Started     pod/jenkins-0   Started container config-reload
+    ev: 8s          Warning   Unhealthy   pod/jenkins-0   Startup probe failed: HTTP probe failed with statuscode: 503
+    [init] Done
+    [init] copy plugins to shared volume
+    [init] finished initialization
+    [jenkins] 2026-10-18 21:20:51.092+0000 [id=33]	INFO	hudson.lifecycle.Lifecycle#onReady: Jenkins is fully up and running
+    [jenkins] 2026-10-18 21:20:54.606+0000 [id=64]	INFO	h.m.DownloadService$Downloadable#load: Obtained the updated data file for hudson.tasks.Maven.MavenInstaller
+    [jenkins] 2026-10-18 21:20:54.607+0000 [id=64]	INFO	hudson.util.Retrier#start: Performed the action check updates server successfully at the attempt #1
+16:21:10 [47s] phase=Running jenkins-ready=true
+    init config-reload-init terminated restarts=0 Completed
+    init init           terminated restarts=0 Completed
+    cont config-reload  running    restarts=0 
+    cont jenkins        running    restarts=0 
+16:21:10 Jenkins is Ready after 47s

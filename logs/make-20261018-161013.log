@@ -1,0 +1,122 @@
+
+==== init all stacks ====
+
+[2026-10-18 16:10:13] $ terraform -chdir=stacks/00-cluster init -upgrade -input=false
+[0m[1mInitializing the backend...[0m
+
+[0m[1mInitializing provider plugins...[0m
+- terraform.io/builtin/terraform is built in to Terraform
+- Finding tehcyx/kind versions matching "~> 0.5"...
+- Using previously-installed tehcyx/kind v0.11.0
+
+
+[0m[1m[32mTerraform has been successfully initialized![0m[32m[0m
+[0m[32m
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.[0m
+[2026-10-18 16:10:14] exit=0  (terraform -chdir=stacks/00-cluster init -upgrade -input=false)
+
+[2026-10-18 16:10:14] $ terraform -chdir=stacks/10-nodes init -upgrade -input=false
+[0m[1mInitializing the backend...[0m
+
+[0m[1mInitializing provider plugins...[0m
+- terraform.io/builtin/terraform is built in to Terraform
+- Finding hashicorp/kubernetes versions matching "~> 2.30"...
+- Finding hashicorp/helm versions matching "~> 2.15"...
+- Finding gavinbunney/kubectl versions matching "~> 1.14"...
+- Using previously-installed hashicorp/kubernetes v2.38.0
+- Using previously-installed hashicorp/helm v2.17.0
+- Using previously-installed gavinbunney/kubectl v1.19.0
+
+
+[0m[1m[32mTerraform has been successfully initialized![0m[32m[0m
+[0m[32m
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.[0m
+[2026-10-18 16:10:14] exit=0  (terraform -chdir=stacks/10-nodes init -upgrade -input=false)
+
+[2026-10-18 16:10:14] $ terraform -chdir=stacks/20-istio init -upgrade -input=false
+[0m[1mInitializing the backend...[0m
+
+[0m[1mInitializing provider plugins...[0m
+- terraform.io/builtin/terraform is built in to Terraform
+- Finding hashicorp/helm versions matching "~> 2.15"...
+- Finding gavinbunney/kubectl versions matching "~> 1.14"...
+- Finding hashicorp/kubernetes versions matching "~> 2.30"...
+- Using previously-installed gavinbunney/kubectl v1.19.0
+- Using previously-installed hashicorp/kubernetes v2.38.0
+- Using previously-installed hashicorp/helm v2.17.0
+
+
+[0m[1m[32mTerraform has been successfully initialized![0m[32m[0m
+[0m[32m
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.[0m
+[2026-10-18 16:10:15] exit=0  (terraform -chdir=stacks/20-istio init -upgrade -input=false)
+
+[2026-10-18 16:10:15] $ terraform -chdir=stacks/30-jenkins init -upgrade -input=false
+[0m[1mInitializing the backend...[0m
+
+[0m[1mInitializing provider plugins...[0m
+- terraform.io/builtin/terraform is built in to Terraform
+- Finding hashicorp/null versions matching "~> 3.2"...
+- Finding hashicorp/kubernetes versions matching "~> 2.30"...
+- Finding hashicorp/helm versions matching "~> 2.15"...
+- Finding gavinbunney/kubectl versions matching "~> 1.14"...
+- Finding hashicorp/random versions matching "~> 3.6"...
+- Using previously-installed hashicorp/kubernetes v2.38.0
+- Using previously-installed hashicorp/helm v2.17.0
+- Using previously-installed gavinbunney/kubectl v1.19.0
+- Using previously-installed hashicorp/random v3.9.1
+- Using previously-installed hashicorp/null v3.3.2
+
+
+[0m[1m[32mTerraform has been successfully initialized![0m[32m[0m
+[0m[32m
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.[0m
+[2026-10-18 16:10:16] exit=0  (terraform -chdir=stacks/30-jenkins init -upgrade -input=false)
+
+[2026-10-18 16:10:16] $ terraform -chdir=stacks/40-jenkins-jobs init -upgrade -input=false
+[0m[1mInitializing the backend...[0m
+
+[0m[1mInitializing provider plugins...[0m
+- terraform.io/builtin/terraform is built in to Terraform
+- Finding gavinbunney/kubectl versions matching "~> 1.14"...
+- Finding hashicorp/kubernetes versions matching "~> 2.30"...
+- Finding hashicorp/helm versions matching "~> 2.15"...
+- Using previously-installed gavinbunney/kubectl v1.19.0
+- Using previously-installed hashicorp/kubernetes v2.38.0
+- Using previously-installed hashicorp/helm v2.17.0
+
+
+[0m[1m[32mTerraform has been successfully initialized![0m[32m[0m
+[0m[32m
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.[0m
+[2026-10-18 16:10:16] exit=0  (terraform -chdir=stacks/40-jenkins-jobs init -upgrade -input=false)

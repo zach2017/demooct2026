@@ -1,0 +1,55 @@
+
+==== apply all stacks 00-cluster 10-nodes 20-istio 30-jenkins 40-jenkins-jobs ====
+
+==== stack 00-cluster ====
+
+[2026-10-18 16:13:31] $ stacks/00-cluster/check-deps.sh
+
+== 00-cluster: required dependencies (KUBECONFIG=/Users/zach/.kube/kind-jenkins.yaml)
+
+[32m[ OK ][0m      cli: terraform                   /opt/homebrew/bin/terraform
+[32m[ OK ][0m      cli: kind                        /opt/homebrew/bin/kind
+[32m[ OK ][0m      cli: kubectl                     /opt/homebrew/bin/kubectl
+[32m[ OK ][0m      cli: docker                      /usr/local/bin/docker
+[32m[ OK ][0m      cli: python3                     /opt/homebrew/bin/python3
+[32m[ OK ][0m      docker daemon                    8 cpu / 4106604544 bytes
+[32m[ OK ][0m      host port 8080                   free
+[32m[ OK ][0m      host port 8443                   free
+
+All dependencies present.
+[2026-10-18 16:13:32] exit=0  (stacks/00-cluster/check-deps.sh)
+
+[2026-10-18 16:13:32] $ terraform -chdir=stacks/00-cluster init -input=false
+[0m[1mInitializing the backend...[0m
+
+[0m[1mInitializing provider plugins...[0m
+- terraform.io/builtin/terraform is built in to Terraform
+- Reusing previous version of tehcyx/kind from the dependency lock file
+- Using previously-installed tehcyx/kind v0.11.0
+
+
+[0m[1m[32mTerraform has been successfully initialized![0m[32m[0m
+[0m[32m
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.[0m
+[2026-10-18 16:13:32] exit=0  (terraform -chdir=stacks/00-cluster init -input=false)
+
+[2026-10-18 16:13:32] $ terraform -chdir=stacks/00-cluster apply -input=false 
+[0m[1mkind_cluster.this: Refreshing state... [id=jenkins-kindest/node:v1.31.2][0m
+
+[0m[1m[31mPlanning failed.[0m[1m Terraform encountered an error while generating this plan.[0m
+
+[0m[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mcould not locate any control plane nodes for cluster named 'jenkins'. Use the --name option to select a different cluster[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with kind_cluster.this,
+[31m│[0m [0m  on main.tf line 3, in resource "kind_cluster" "this":
+[31m│[0m [0m   3: resource "kind_cluster" "this" [4m{[0m[0m
+[31m│[0m [0m
+[31m╵[0m[0m
+[2026-10-18 16:13:32] exit=1  (terraform -chdir=stacks/00-cluster apply -input=false )

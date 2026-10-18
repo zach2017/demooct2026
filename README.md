@@ -187,3 +187,26 @@ namespaces, running builds) with the `kubectl`/`terraform` command that shows
 the object, and aborts before touching anything. `FORCE_DESTROY=1` bypasses it.
 See **OPERATIONS.md** for the per-stack update procedures and the
 before/after checklist.
+
+```
+== 30-jenkins: required dependencies (KUBECONFIG=/Users/zach/.kube/kind-jenkins.yaml)
+
+[ OK ]      cli: terraform                   /opt/homebrew/bin/terraform
+[ OK ]      cli: kubectl                     /opt/homebrew/bin/kubectl
+[ OK ]      cli: helm                        /opt/homebrew/bin/helm
+[ OK ]      cli: python3                     /opt/homebrew/bin/python3
+[ OK ]      state: 00-cluster                /Users/zach/demooct2026/state/00-cluster.tfstate
+[ OK ]      state: 10-nodes                  /Users/zach/demooct2026/state/10-nodes.tfstate
+[ OK ]      state: 20-istio                  /Users/zach/demooct2026/state/20-istio.tfstate
+[ OK ]      cluster reachable                kind-jenkins
+[ OK ]      node jenkins-worker (role=jenkins-controller) Ready
+[ OK ]      node jenkins-worker2 (role=jenkins-agent) Ready
+[ OK ]      namespace: istio-system          
+[ OK ]      crd: gateways.networking.istio.io 
+[ OK ]      crd: virtualservices.networking.istio.io 
+[ OK ]      deployment/istiod (ns istio-system) 1/1 ready
+[ OK ]      deployment/istio-ingressgateway (ns istio-system) 1/1 ready
+[ OK ]      sidecar injector webhook         
+[ OK ]      storageclass standard            kind local-path
+
+```

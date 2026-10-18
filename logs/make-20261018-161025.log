@@ -1,0 +1,21 @@
+
+==== apply all stacks 00-cluster 10-nodes 20-istio 30-jenkins 40-jenkins-jobs ====
+
+==== stack 00-cluster ====
+
+[2026-10-18 16:10:25] $ stacks/00-cluster/check-deps.sh
+
+== 00-cluster: required dependencies (KUBECONFIG=/Users/zach/.kube/kind-jenkins.yaml)
+
+[32m[ OK ][0m      cli: terraform                   /opt/homebrew/bin/terraform
+[32m[ OK ][0m      cli: kind                        /opt/homebrew/bin/kind
+[32m[ OK ][0m      cli: kubectl                     /opt/homebrew/bin/kubectl
+[32m[ OK ][0m      cli: docker                      /usr/local/bin/docker
+[32m[ OK ][0m      cli: python3                     /opt/homebrew/bin/python3
+[32m[ OK ][0m      docker daemon                    8 cpu / 4106604544 bytes
+[33m[UNHEALTHY][0m docker memory                    3 GB; raise to >= 6 GB in Docker Desktop > Resources
+[32m[ OK ][0m      host port 8080                   free
+[32m[ OK ][0m      host port 8443                   free
+
+0 missing, 1 unhealthy. Resolve the items above before applying this stack.
+[2026-10-18 16:10:27] exit=1  (stacks/00-cluster/check-deps.sh)
