@@ -1,5 +1,9 @@
 # Pros and Cons: Breaking Out Terraform into Modular Stages
 
+https://www.hashicorp.com/en/resources/evolving-infrastructure-terraform-opencredo
+
+https://developer.hashicorp.com/terraform/tutorials/networking/multicloud-kubernetes
+
 **Context:** Moving from a single monolithic Terraform configuration to independent root modules (stacks) that communicate via `terraform_remote_state`, as demonstrated in https://github.com/zach2017/demooct2026.
 
 ---
