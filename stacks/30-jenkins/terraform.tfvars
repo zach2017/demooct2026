@@ -1,4 +1,5 @@
-jenkins_image_tag          = "2.580.1-jdk21"   # keep this a current LTS
+jenkins_chart_version      = "5.9.69"   # chart appVersion = Jenkins image; keep current
+# jenkins_image_tag        = ""         # leave empty to use the chart's appVersion
 jenkins_controller_sidecar = false
 jenkins_sidecar_injection  = true
 

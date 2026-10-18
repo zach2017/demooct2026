@@ -1,121 +1,46 @@
-15:15:10 waiting for pod jenkins/jenkins-0 (timeout 1800s); log: ./jenkins-startup.log
-15:15:10 [0s] phase=Running jenkins-ready=false
+15:29:58 waiting for pod jenkins/jenkins-0 (timeout 1800s); log: ./jenkins-startup.log
+15:29:58 [0s] phase=Running jenkins-ready=false
     init config-reload-init terminated restarts=0 Completed
     init init           terminated restarts=0 Completed
     cont config-reload  running    restarts=0 
-    cont jenkins        waiting    restarts=7 CrashLoopBackOff
-    ev: 12m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 339ms (339ms including waiting). Image size: 245503399 bytes.
-    ev: 11m         Normal    Pulling     pod/jenkins-0   Pulling image "docker.io/jenkins/jenkins:2.580.1-jdk21"
-    ev: 11m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 385ms (385ms including waiting). Image size: 245503399 bytes.
-    ev: 2m48s       Warning   BackOff     pod/jenkins-0   Back-off restarting failed container jenkins in pod jenkins-0_jenkins(c2506a2c-d501-44eb-8113-a03d52887eaf)
+    cont jenkins        running    restarts=10 
+    ev: 27m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 339ms (339ms including waiting). Image size: 245503399 bytes.
+    ev: 26m         Normal    Pulling     pod/jenkins-0   Pulling image "docker.io/jenkins/jenkins:2.580.1-jdk21"
+    ev: 26m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 385ms (385ms including waiting). Image size: 245503399 bytes.
+    ev: 2m29s       Warning   BackOff     pod/jenkins-0   Back-off restarting failed container jenkins in pod jenkins-0_jenkins(c2506a2c-d501-44eb-8113-a03d52887eaf)
     [init] Done
     [init] copy plugins to shared volume
     [init] finished initialization
-    [jenkins] 	at Jenkins Main ClassLoader//org.eclipse.jetty.util.component.AbstractLifeCycle.stop(AbstractLifeCycle.java:131)
-    [jenkins] 	at Jenkins Main ClassLoader//winstone.Launcher.shutdown(Launcher.java:441)
-    [jenkins] 	at Jenkins Main ClassLoader//winstone.ShutdownHook.run(ShutdownHook.java:28)
-15:15:25 [15s] phase=Running jenkins-ready=false
+    [jenkins] 2026-10-18 20:29:58.265+0000 [id=30]	INFO	jenkins.model.Jenkins#<init>: Starting version 2.580.1
+    [jenkins] 2026-10-18 20:29:58.311+0000 [id=38]	INFO	jenkins.InitReactorRunner$1#onAttained: Started initialization
+    [jenkins] 2026-10-18 20:29:58.392+0000 [id=39]	INFO	jenkins.InitReactorRunner$1#onAttained: Listed all plugins
+15:30:14 [16s] phase=Pending jenkins-ready=false
+    init config-reload-init waiting    restarts=0 PodInitializing
+    init init           waiting    restarts=0 PodInitializing
+    cont config-reload  waiting    restarts=0 PodInitializing
+    cont jenkins        waiting    restarts=0 PodInitializing
+    ev: 27m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 385ms (385ms including waiting). Image size: 245503399 bytes.
+    ev: 2m45s       Warning   BackOff     pod/jenkins-0   Back-off restarting failed container jenkins in pod jenkins-0_jenkins(c2506a2c-d501-44eb-8113-a03d52887eaf)
+    ev: 1s          Normal    Scheduled   pod/jenkins-0   Successfully assigned jenkins/jenkins-0 to jenkins-worker
+    ev: 1s          Normal    Pulling     pod/jenkins-0   Pulling image "docker.io/kiwigrid/k8s-sidecar:2.11.2"
+15:30:30 [31s] phase=Running jenkins-ready=false
     init config-reload-init terminated restarts=0 Completed
     init init           terminated restarts=0 Completed
     cont config-reload  running    restarts=0 
-    cont jenkins        waiting    restarts=7 CrashLoopBackOff
-    ev: 12m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 339ms (339ms including waiting). Image size: 245503399 bytes.
-    ev: 12m         Normal    Pulling     pod/jenkins-0   Pulling image "docker.io/jenkins/jenkins:2.580.1-jdk21"
-    ev: 12m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 385ms (385ms including waiting). Image size: 245503399 bytes.
-    ev: 3m3s        Warning   BackOff     pod/jenkins-0   Back-off restarting failed container jenkins in pod jenkins-0_jenkins(c2506a2c-d501-44eb-8113-a03d52887eaf)
+    cont jenkins        running    restarts=0 
+    ev: 2s          Normal    Started     pod/jenkins-0   Started container jenkins
+    ev: 2s          Normal    Pulled      pod/jenkins-0   Container image "docker.io/kiwigrid/k8s-sidecar:2.11.2" already present on machine
+    ev: 2s          Normal    Created     pod/jenkins-0   Created container config-reload
+    ev: 2s          Normal    Started     pod/jenkins-0   Started container config-reload
     [init] Done
     [init] copy plugins to shared volume
     [init] finished initialization
-    [jenkins] 	at Jenkins Main ClassLoader//org.eclipse.jetty.util.component.AbstractLifeCycle.stop(AbstractLifeCycle.java:131)
-    [jenkins] 	at Jenkins Main ClassLoader//winstone.Launcher.shutdown(Launcher.java:441)
-    [jenkins] 	at Jenkins Main ClassLoader//winstone.ShutdownHook.run(ShutdownHook.java:28)
-15:15:41 [31s] phase=Running jenkins-ready=false
+    [jenkins] 2026-10-18 20:30:30.276+0000 [id=3]	INFO	o.e.j.server.AbstractConnector#doStart: Started oejs.ServerConnector@359b650b{HTTP/1.1, (http/1.1)}{0.0.0.0:8080}
+    [jenkins] 2026-10-18 20:30:30.276+0000 [id=3]	INFO	org.eclipse.jetty.server.Server#doStart: Started oejs.Server@6a9b0a6f{STARTING}[12.1.13,sto=0] @721ms
+    [jenkins] 2026-10-18 20:30:30.277+0000 [id=34]	INFO	winstone.Logger#logInternal: Winstone Servlet Engine running: controlPort=disabled
+15:30:45 [47s] phase=Running jenkins-ready=true
     init config-reload-init terminated restarts=0 Completed
     init init           terminated restarts=0 Completed
     cont config-reload  running    restarts=0 
-    cont jenkins        waiting    restarts=7 CrashLoopBackOff
-    ev: 12m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 339ms (339ms including waiting). Image size: 245503399 bytes.
-    ev: 12m         Normal    Pulling     pod/jenkins-0   Pulling image "docker.io/jenkins/jenkins:2.580.1-jdk21"
-    ev: 12m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 385ms (385ms including waiting). Image size: 245503399 bytes.
-    ev: 3m19s       Warning   BackOff     pod/jenkins-0   Back-off restarting failed container jenkins in pod jenkins-0_jenkins(c2506a2c-d501-44eb-8113-a03d52887eaf)
-    [init] Done
-    [init] copy plugins to shared volume
-    [init] finished initialization
-    [jenkins] 	at Jenkins Main ClassLoader//org.eclipse.jetty.util.component.AbstractLifeCycle.stop(AbstractLifeCycle.java:131)
-    [jenkins] 	at Jenkins Main ClassLoader//winstone.Launcher.shutdown(Launcher.java:441)
-    [jenkins] 	at Jenkins Main ClassLoader//winstone.ShutdownHook.run(ShutdownHook.java:28)
-15:15:56 [46s] phase=Running jenkins-ready=false
-    init config-reload-init terminated restarts=0 Completed
-    init init           terminated restarts=0 Completed
-    cont config-reload  running    restarts=0 
-    cont jenkins        waiting    restarts=7 CrashLoopBackOff
-    ev: 13m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 339ms (339ms including waiting). Image size: 245503399 bytes.
-    ev: 12m         Normal    Pulling     pod/jenkins-0   Pulling image "docker.io/jenkins/jenkins:2.580.1-jdk21"
-    ev: 12m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 385ms (385ms including waiting). Image size: 245503399 bytes.
-    ev: 3m34s       Warning   BackOff     pod/jenkins-0   Back-off restarting failed container jenkins in pod jenkins-0_jenkins(c2506a2c-d501-44eb-8113-a03d52887eaf)
-    [init] Done
-    [init] copy plugins to shared volume
-    [init] finished initialization
-    [jenkins] 	at Jenkins Main ClassLoader//org.eclipse.jetty.util.component.AbstractLifeCycle.stop(AbstractLifeCycle.java:131)
-    [jenkins] 	at Jenkins Main ClassLoader//winstone.Launcher.shutdown(Launcher.java:441)
-    [jenkins] 	at Jenkins Main ClassLoader//winstone.ShutdownHook.run(ShutdownHook.java:28)
-15:16:12 [62s] phase=Running jenkins-ready=false
-    init config-reload-init terminated restarts=0 Completed
-    init init           terminated restarts=0 Completed
-    cont config-reload  running    restarts=0 
-    cont jenkins        waiting    restarts=7 CrashLoopBackOff
-    ev: 13m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 339ms (339ms including waiting). Image size: 245503399 bytes.
-    ev: 13m         Normal    Pulling     pod/jenkins-0   Pulling image "docker.io/jenkins/jenkins:2.580.1-jdk21"
-    ev: 13m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 385ms (385ms including waiting). Image size: 245503399 bytes.
-    ev: 3m50s       Warning   BackOff     pod/jenkins-0   Back-off restarting failed container jenkins in pod jenkins-0_jenkins(c2506a2c-d501-44eb-8113-a03d52887eaf)
-    [init] Done
-    [init] copy plugins to shared volume
-    [init] finished initialization
-    [jenkins] 	at Jenkins Main ClassLoader//org.eclipse.jetty.util.component.AbstractLifeCycle.stop(AbstractLifeCycle.java:131)
-    [jenkins] 	at Jenkins Main ClassLoader//winstone.Launcher.shutdown(Launcher.java:441)
-    [jenkins] 	at Jenkins Main ClassLoader//winstone.ShutdownHook.run(ShutdownHook.java:28)
-15:16:27 [77s] phase=Running jenkins-ready=false
-    init config-reload-init terminated restarts=0 Completed
-    init init           terminated restarts=0 Completed
-    cont config-reload  running    restarts=0 
-    cont jenkins        waiting    restarts=7 CrashLoopBackOff
-    ev: 13m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 339ms (339ms including waiting). Image size: 245503399 bytes.
-    ev: 13m         Normal    Pulling     pod/jenkins-0   Pulling image "docker.io/jenkins/jenkins:2.580.1-jdk21"
-    ev: 13m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 385ms (385ms including waiting). Image size: 245503399 bytes.
-    ev: 4m6s        Warning   BackOff     pod/jenkins-0   Back-off restarting failed container jenkins in pod jenkins-0_jenkins(c2506a2c-d501-44eb-8113-a03d52887eaf)
-    [init] Done
-    [init] copy plugins to shared volume
-    [init] finished initialization
-    [jenkins] 	at Jenkins Main ClassLoader//org.eclipse.jetty.util.component.AbstractLifeCycle.stop(AbstractLifeCycle.java:131)
-    [jenkins] 	at Jenkins Main ClassLoader//winstone.Launcher.shutdown(Launcher.java:441)
-    [jenkins] 	at Jenkins Main ClassLoader//winstone.ShutdownHook.run(ShutdownHook.java:28)
-15:16:43 [93s] phase=Running jenkins-ready=false
-    init config-reload-init terminated restarts=0 Completed
-    init init           terminated restarts=0 Completed
-    cont config-reload  running    restarts=0 
-    cont jenkins        waiting    restarts=7 CrashLoopBackOff
-    ev: 13m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 339ms (339ms including waiting). Image size: 245503399 bytes.
-    ev: 13m         Normal    Pulling     pod/jenkins-0   Pulling image "docker.io/jenkins/jenkins:2.580.1-jdk21"
-    ev: 13m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 385ms (385ms including waiting). Image size: 245503399 bytes.
-    ev: 4m21s       Warning   BackOff     pod/jenkins-0   Back-off restarting failed container jenkins in pod jenkins-0_jenkins(c2506a2c-d501-44eb-8113-a03d52887eaf)
-    [init] Done
-    [init] copy plugins to shared volume
-    [init] finished initialization
-    [jenkins] 	at Jenkins Main ClassLoader//org.eclipse.jetty.util.component.AbstractLifeCycle.stop(AbstractLifeCycle.java:131)
-    [jenkins] 	at Jenkins Main ClassLoader//winstone.Launcher.shutdown(Launcher.java:441)
-    [jenkins] 	at Jenkins Main ClassLoader//winstone.ShutdownHook.run(ShutdownHook.java:28)
-15:16:59 [108s] phase=Running jenkins-ready=false
-    init config-reload-init terminated restarts=0 Completed
-    init init           terminated restarts=0 Completed
-    cont config-reload  running    restarts=0 
-    cont jenkins        waiting    restarts=7 CrashLoopBackOff
-    ev: 14m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 339ms (339ms including waiting). Image size: 245503399 bytes.
-    ev: 13m         Normal    Pulling     pod/jenkins-0   Pulling image "docker.io/jenkins/jenkins:2.580.1-jdk21"
-    ev: 13m         Normal    Pulled      pod/jenkins-0   Successfully pulled image "docker.io/jenkins/jenkins:2.580.1-jdk21" in 385ms (385ms including waiting). Image size: 245503399 bytes.
-    ev: 4m37s       Warning   BackOff     pod/jenkins-0   Back-off restarting failed container jenkins in pod jenkins-0_jenkins(c2506a2c-d501-44eb-8113-a03d52887eaf)
-    [init] Done
-    [init] copy plugins to shared volume
-    [init] finished initialization
-    [jenkins] 	at Jenkins Main ClassLoader//org.eclipse.jetty.util.component.AbstractLifeCycle.stop(AbstractLifeCycle.java:131)
-    [jenkins] 	at Jenkins Main ClassLoader//winstone.Launcher.shutdown(Launcher.java:441)
-    [jenkins] 	at Jenkins Main ClassLoader//winstone.ShutdownHook.run(ShutdownHook.java:28)
+    cont jenkins        running    restarts=0 
+15:30:45 Jenkins is Ready after 47s

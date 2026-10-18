@@ -32,21 +32,21 @@ variable "jenkins_helm_timeout" {
 # --- Jenkins ----------------------------------------------------------------
 
 variable "jenkins_chart_version" {
-  description = "jenkinsci/jenkins Helm chart version"
+  description = "jenkinsci/jenkins Helm chart version. Its appVersion is the Jenkins image used unless jenkins_image_tag overrides it. Keep this current: an old chart's default JCasC can reference attributes removed from newer cores (e.g. excludeClientIPFromCrumb)."
   type        = string
-  default     = "5.8.0"
+  default     = "5.9.69"
 }
 
 variable "jenkins_image_tag" {
   description = <<-EOT
-    jenkins/jenkins image tag. Must be a CURRENT LTS: the chart installs the
-    latest plugin releases, and those require a recent core (an older pinned
-    chart image fails in the init container with
-    "<plugin> requires a greater version of Jenkins"). Latest LTS:
-    https://www.jenkins.io/changelog-stable/
+    Optional jenkins/jenkins image tag override. Empty (default) uses the
+    chart's appVersion, which the chart's default JCasC and plugin bundle are
+    tested against. If you do override it, pick a current LTS
+    (https://www.jenkins.io/changelog-stable/): the chart installs the latest
+    plugin releases, which require a recent core.
   EOT
   type        = string
-  default     = "2.580.1-jdk21"
+  default     = ""
 }
 
 variable "jenkins_admin_user" {
