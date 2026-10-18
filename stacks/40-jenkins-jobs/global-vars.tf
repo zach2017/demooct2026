@@ -7,7 +7,7 @@
 # re-applying this stack is enough; running builds keep their old values.
 
 locals {
-  global_vars_file = "${path.module}/../../jenkins/globalVars.yaml"
+  global_vars_file = "${path.module}/jenkins/globalVars.yaml"
   global_vars_raw  = yamldecode(file(local.global_vars_file))
   # Everything must be a string for a ConfigMap; stringify scalars, reject nested.
   global_vars = { for k, v in local.global_vars_raw : k => tostring(v) }

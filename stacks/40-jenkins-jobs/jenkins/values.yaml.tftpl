@@ -1,0 +1,138 @@
+# Rendered by Terraform (templatefile) and passed to the jenkinsci/jenkins chart.
+# Target: local kind cluster, Istio mesh (namespace has istio-injection=enabled).
+
+controller:
+%{~ if jenkins_image_tag != "" }
+  # Override the chart's appVersion image; see var.jenkins_image_tag.
+  image:
+    tag: "${jenkins_image_tag}"
+%{~ endif }
+
+  admin:
+    existingSecret: jenkins-admin
+    userKey: jenkins-admin-user
+    passwordKey: jenkins-admin-password
+
+  # Exposed via Istio Gateway + VirtualService (terraform/istio.tf); the Service
+  # itself stays cluster-internal.
+  serviceType: ClusterIP
+  jenkinsUrl: ${jenkins_url}
+
+  # Per-pod override of the namespace-wide istio-injection label.
+  podAnnotations:
+    sidecar.istio.io/inject: "${controller_sidecar ? "true" : "false"}"
+
+  # Pin the controller to the node 10-nodes labeled for it.
+  nodeSelector:
+%{~ for k, v in controller_selector }
+    ${k}: ${v}
+%{~ endfor }
+  tolerations:
+    - key: role
+      operator: Equal
+      value: jenkins-controller
+      effect: NoSchedule
+
+  sidecars:
+    configAutoReload:
+      enabled: true   # watches labeled ConfigMaps -> JCasC reload (jobs stack)
+
+  resources:
+    requests: { cpu: 250m, memory: 768Mi }
+    limits:   { cpu: "2", memory: 2Gi }
+  javaOpts: "-Xmx1g -XX:+UseContainerSupport"
+
+  # First boot installs ~40 transitive plugins and runs JCasC + Job DSL; the
+  # chart default startup window (~2 min) is too short and restart-loops.
+  healthProbes: true
+  probes:
+    startupProbe:
+      httpGet: { path: /login, port: http }
+      periodSeconds: 10
+      failureThreshold: 60      # 10 min
+    livenessProbe:
+      httpGet: { path: /login, port: http }
+      periodSeconds: 10
+      failureThreshold: 5
+    readinessProbe:
+      httpGet: { path: /login, port: http }
+      periodSeconds: 10
+      failureThreshold: 3
+
+  # Plugin download retries (init container)
+  initContainerEnv:
+    - name: CURL_RETRY
+      value: "5"
+    - name: CURL_RETRY_MAX_TIME
+      value: "120"
+
+  installPlugins:
+    - kubernetes
+    - workflow-aggregator
+    - git
+    - configuration-as-code
+    - job-dsl
+    - pipeline-utility-steps
+
+  JCasC:
+    defaultConfig: true
+    configScripts:
+      # Jenkins-level global env vars, mirrored from the jenkins-global-env ConfigMap.
+      global-env: |
+        jenkins:
+          globalNodeProperties:
+            - envVars:
+                env:
+%{~ for k, v in global_env }
+                  - key: "${k}"
+                    value: "${v}"
+%{~ endfor }
+
+      # Jobs are delivered by stacks/40-jenkins-jobs as separate ConfigMaps
+      # (label jenkins-jenkins-config=true) and hot-reloaded by this sidecar:
+agent:
+  # Pipeline pods run only on the autoscaled "agents" pool.
+  nodeSelector:
+%{~ for k, v in agent_selector }
+    ${k}: ${v}
+%{~ endfor }
+
+  # Merge this into every agent pod. envFrom makes the ConfigMap keys
+  # available as environment variables in every container of the pod.
+  yamlMergeStrategy: merge
+  yamlTemplate: |-
+    apiVersion: v1
+    kind: Pod
+    spec:
+      tolerations:
+        - key: role
+          operator: Equal
+          value: jenkins-agent
+          effect: NoSchedule
+      containers:
+        - name: jnlp
+          envFrom:
+            - configMapRef:
+                name: ${global_env_configmap}
+            # jenkins/globalVars.yaml via stacks/40-jenkins-jobs; listed last so
+            # it overrides duplicate keys. Optional so agents start before 40 exists.
+            - configMapRef:
+                name: jenkins-agent-global-vars
+                optional: true
+          volumeMounts:
+            - name: hello-src
+              mountPath: /bundled-src
+      volumes:
+        - name: hello-src
+          configMap:
+            name: hello-src
+            optional: true   # created by stacks/40-jenkins-jobs
+
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits:   { cpu: "1", memory: 1Gi }
+
+persistence:
+  enabled: true
+  size: 8Gi
+  storageClass: standard   # kind's default local-path provisioner

@@ -30,12 +30,8 @@ if check_cluster_reachable; then
   if kubectl -n jenkins get cm jenkins-jenkins-jcasc-config -o jsonpath='{.data}' 2>/dev/null | grep -q jenkins-agent-global-vars; then
     _ok "agent template envFrom" "jenkins-agent-global-vars referenced"
   else _miss "agent template envFrom" "30-jenkins values are older than this stack: make 30-jenkins"; fi
-  if [ -f "$ROOT/jenkins/globalVars.yaml" ]; then
-    if python3 -c 'import yaml,sys,re; d=yaml.safe_load(open(sys.argv[1])) or {}; assert isinstance(d,dict); bad=[k for k,v in d.items() if isinstance(v,(dict,list)) or not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$",str(k))]; sys.exit(1 if bad else 0)' "$ROOT/jenkins/globalVars.yaml" 2>/dev/null; then
-      _ok "jenkins/globalVars.yaml" "$(python3 -c 'import yaml,sys; print(len(yaml.safe_load(open(sys.argv[1])) or {}))' "$ROOT/jenkins/globalVars.yaml") keys"
-    else _bad "jenkins/globalVars.yaml" "must be a flat map of scalar values with env-var-safe keys (or PyYAML missing: pip install pyyaml)"; fi
-  else _miss "jenkins/globalVars.yaml" "create it (see README: Global env vars)"; fi
-  # Jenkins answering through the Istio gateway
+  echo "$ROOT/jenkins/globalVars.yaml"
+  check_global_vars "$ROOT"
   check_http "http://localhost:${INGRESS_PORT:-8080}/login" "ingress Gateway/VirtualService from 30-jenkins or Jenkins not Ready"
   # agent nodes for the builds these jobs will run
   check_node_label "role=jenkins-agent" "make 10-nodes"

@@ -1,0 +1,19 @@
+# Global environment variables for EVERY Jenkins agent pod (every pipeline run).
+#
+# Applied by stacks/40-jenkins-jobs/global-vars.tf as ConfigMap
+# jenkins-agent-global-vars; the agent pod template (jenkins/values.yaml.tftpl)
+# injects it with envFrom, so every container in the pod sees these as plain
+# environment variables ($NAME in sh steps, env.NAME in Groovy).
+#
+# Rules: flat map, string values only (numbers/bools are quoted), keys are
+# valid env var names. Change a value -> `make 40-jenkins-jobs` -> next build
+# picks it up (no controller restart).
+#
+# Note: jenkins-global-env (stack 30, var.global_env) is a separate map that is
+# ALSO set as Jenkins global env on the controller. Values here win on the
+# agent if the same key exists in both (envFrom order: this map is listed last).
+
+GLOBAL_GREETING: "Hello from globalVars.yaml"
+BUILD_TEAM: "platform"
+DEFAULT_BRANCH: "main"
+ARTIFACT_RETENTION_DAYS: "14"

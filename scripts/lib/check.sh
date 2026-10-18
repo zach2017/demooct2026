@@ -141,3 +141,63 @@ check_summary() {
   echo "$MISSING missing, $UNHEALTHY unhealthy. Resolve the items above before applying this stack."
   return 1
 }
+
+
+command -v _ok   >/dev/null 2>&1 || _ok()   { printf '  \033[32m✔\033[0m %s: %s\n' "$1" "$2"; }
+command -v _bad  >/dev/null 2>&1 || _bad()  { printf '  \033[31m✘\033[0m %s: %s\n' "$1" "$2" >&2; }
+command -v _miss >/dev/null 2>&1 || _miss() { printf '  \033[33m?\033[0m %s: %s\n' "$1" "$2" >&2; }
+
+
+_pip_ensure() {
+  local req=$1 py=${PYTHON:-python3}
+  [ -f "$req" ] || { echo "requirements file not found: $req" >&2; return 1; }
+  command -v "$py" >/dev/null 2>&1 || { echo "$py not found" >&2; return 1; }
+ 
+  # Fast path: already satisfied?
+  if "$py" -m pip --disable-pip-version-check check >/dev/null 2>&1 \
+     && "$py" -c 'import yaml' >/dev/null 2>&1; then
+    return 0
+  fi
+ 
+  local extra=()
+  [ -z "${VIRTUAL_ENV:-}" ] && extra=(--user)
+  if ! "$py" -m pip install -q --disable-pip-version-check "${extra[@]}" -r "$req" 2>/dev/null; then
+    # PEP 668 managed environment → retry with the override.
+    "$py" -m pip install -q --disable-pip-version-check "${extra[@]}" --break-system-packages -r "$req" \
+      || { echo "pip install -r $req failed" >&2; return 1; }
+  fi
+}
+ 
+# check_global_vars [ROOT]
+#   ROOT defaults to $ROOT, then ".". Reports via _ok/_bad/_miss and returns
+#   the validator's exit code (0 ok, 1 invalid, 2 missing/unparseable).
+check_global_vars() {
+  local root=${1:-${ROOT:-.}} py=${PYTHON:-python3}
+  local here; here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+  local validator=${VALIDATOR:-$here/validate_global_vars.py}
+  local req=${REQUIREMENTS:-$here/requirements.txt}
+  local label="jenkins/globalVars.yaml" out rc
+ 
+  [ -f "$validator" ] || { _bad "$label" "validator not found: $validator"; return 2; }
+ 
+  if ! out=$(_pip_ensure "$req" 2>&1); then
+    _bad "$label" "could not install deps: ${out:-unknown error}"
+    return 2
+  fi
+ 
+  out=$("$py" "$validator" --root "$root" 2>&1); rc=$?
+  local first=${out%%$'\n'*} rest=${out#*$'\n'}
+  case $rc in
+    0) _ok   "$label" "${first#*: }" ;;                       # "N keys"
+    2) if [[ $first == MISSING* ]]; then _miss "$label" "create it (see README: Global env vars)"
+       else _bad "$label" "${first#*: }"; fi ;;               # parse error text
+    *) _bad  "$label" "$(printf '%s' "${rest//  - /}" | paste -sd ';' | sed 's/;/; /g')" ;;
+  esac
+  return $rc
+}
+ 
+# Run directly (not sourced) → execute.
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  check_global_vars "$@"
+fi
+ 

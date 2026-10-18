@@ -189,24 +189,31 @@ See **OPERATIONS.md** for the per-stack update procedures and the
 before/after checklist.
 
 ```
-== 30-jenkins: required dependencies (KUBECONFIG=/Users/zach/.kube/kind-jenkins.yaml)
+== 40-jenkins-jobs: required dependencies (KUBECONFIG=/Users/zach/.kube/kind-jenkins.yaml)
 
 [ OK ]      cli: terraform                   /opt/homebrew/bin/terraform
 [ OK ]      cli: kubectl                     /opt/homebrew/bin/kubectl
-[ OK ]      cli: helm                        /opt/homebrew/bin/helm
 [ OK ]      cli: python3                     /opt/homebrew/bin/python3
 [ OK ]      state: 00-cluster                /Users/zach/demooct2026/state/00-cluster.tfstate
-[ OK ]      state: 10-nodes                  /Users/zach/demooct2026/state/10-nodes.tfstate
-[ OK ]      state: 20-istio                  /Users/zach/demooct2026/state/20-istio.tfstate
+[ OK ]      state: 30-jenkins                /Users/zach/demooct2026/state/30-jenkins.tfstate
 [ OK ]      cluster reachable                kind-jenkins
-[ OK ]      node jenkins-worker (role=jenkins-controller) Ready
+[ OK ]      namespace: jenkins               
+[ OK ]      helm release: jenkins/jenkins    deployed
+[ OK ]      pod/jenkins-0 (ns jenkins)       Ready
+[ OK ]      configmap/jenkins-global-env (ns jenkins) 
+[ OK ]      config-reload sidecar            jobs ConfigMaps will be hot-reloaded
+[ OK ]      plugin: job-dsl                  
+[ OK ]      plugin: configuration-as-code    
+[ OK ]      plugin: workflow-aggregator      
+[ OK ]      plugin: kubernetes               
+[ OK ]      agent template envFrom           jenkins-agent-global-vars referenced
+[UNHEALTHY] jenkins/globalVars.yaml          must be a flat map of scalar values with env-var-safe keys (or PyYAML missing: pip install pyyaml)
+[ OK ]      http http://localhost:8080/login HTTP 200
 [ OK ]      node jenkins-worker2 (role=jenkins-agent) Ready
-[ OK ]      namespace: istio-system          
-[ OK ]      crd: gateways.networking.istio.io 
-[ OK ]      crd: virtualservices.networking.istio.io 
-[ OK ]      deployment/istiod (ns istio-system) 1/1 ready
-[ OK ]      deployment/istio-ingressgateway (ns istio-system) 1/1 ready
-[ OK ]      sidecar injector webhook         
-[ OK ]      storageclass standard            kind local-path
+
+0 missing, 1 unhealthy. Resolve the items above before applying this stack.
+
+kubectl -n jenkins get secret jenkins-admin -o jsonpath='{.data.jenkins-admin-password}' | base64 -d; echo
+
 
 ```
